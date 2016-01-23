@@ -28,7 +28,7 @@ type RepositoryRow struct {
 	// Repository's engine
 	Engine RepositoryEngine
 
-	// PackageCount holds amount of packages stored in the repository
+	// PackageCount holds amount of packages in the repository
 	PackageCount int `bson:"-"`
 }
 

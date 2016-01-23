@@ -8,8 +8,8 @@ import (
 // Model provides single point of access to all models
 type Model struct {
 	Repository *Repository
-
-	logger *log.Logger
+	Package    *Package
+	logger     *log.Logger
 }
 
 // New creates object Model
@@ -20,6 +20,11 @@ func New(db *mgo.Database, l *log.Logger) (*Model, error) {
 	m := &Model{logger: l}
 
 	m.Repository, err = NewRepository(db)
+	if err != nil {
+		return nil, err
+	}
+
+	m.Package, err = NewPackage(db)
 	if err != nil {
 		return nil, err
 	}
