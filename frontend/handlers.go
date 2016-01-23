@@ -14,7 +14,6 @@ func notFoundHandler(err error, c *echo.Context) {
 		}
 	}
 
-	c.Echo().DefaultHTTPErrorHandler(err, c)
 	return
 }
 

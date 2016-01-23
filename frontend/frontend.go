@@ -50,6 +50,7 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 	f.router.Static("/css", path.Join(f.cfg.AssetFolder, "/css"))
 	f.router.Static("/img", path.Join(f.cfg.AssetFolder, "/img"))
 	f.router.Static("/js", path.Join(f.cfg.AssetFolder, "/js"))
+	f.router.Static("/fonts", path.Join(f.cfg.AssetFolder, "/fonts"))
 	f.router.Favicon(path.Join(f.cfg.AssetFolder, "/img/favicon.ico"))
 
 	f.router.SetHTTPErrorHandler(notFoundHandler)
