@@ -18,13 +18,13 @@ type HandlerConfig struct {
 }
 
 type handler struct {
-	cfg   *HandlerConfig
-	store session.CookieStore
+	cfg     *HandlerConfig
+	store   session.CookieStore
 	backend *backend.Backend
 }
 
 func New(cfg *HandlerConfig, store session.CookieStore, b *backend.Backend) handler {
-	return handler{cfg: cfg, store: store, b *backend.Backend}
+	return handler{cfg: cfg, store: store, b * backend.Backend}
 }
 
 func (h *handler) NotFoundHandler(err error, c *echo.Context) {
