@@ -124,28 +124,22 @@ func (br *BenchClient) execTask() {
 	result := common.TaskResult{Id: task.Id, Round: make(map[string]parse.Set)}
 
 	// Download target package
-	cmd := exec.Command("go", "get", task.PackageUrl)
-	err = cmd.Start()
+	fPath, err := downloadPackage(task.PackageUrl)
 	if err != nil {
 		br.log.Printf("Package download failed. Details: %s", err)
-		// TODO: inform server abour problem
 		return
 	}
+	br.log.Println("Package downloaded")
 
-	log.Printf("Waiting for command to finish...")
-	if err = cmd.Wait(); err != nil {
-		br.log.Printf("Command finished with error: %s", err)
-		// TODO: проверить как это работает на самом деле
+	// Donwload target package dependencies
+	err = downloadPackageDependencies(fPath)
+	if err != nil {
+		br.log.Printf("Package dependencies download failed. Details: %s", err)
+		return
 	}
+	br.log.Println("Package dependecies downloaded")
 
-	// Donwload dependencies
-	// TODO
-
-	//
-	//br.log.Println(err, string(buf))
 	os.Exit(0)
-
-	// Отсюда и ниже уже
 
 	// 2. прогоняем go test bench для разного количества GOMAXPROCSs
 	for i := 0; i < runtime.NumCPU(); i++ {
@@ -244,4 +238,30 @@ func (br *BenchClient) submitResult(result *common.TaskResult) error {
 
 func (br *BenchClient) stop() {
 	close(br.stopCh)
+}
+
+func downloadPackageDependencies(name string) error {
+
+	return nil
+}
+
+func downloadPackage(name string) (string, error) {
+
+	gopath, ok := os.LookupEnv("GOPATH")
+	if !ok {
+		return "", errors.New("Environment variable GOPATH not found")
+	}
+
+	cmd := exec.Command("go", "get", name)
+	err := cmd.Start()
+	if err != nil {
+		return "", err
+	}
+	if err = cmd.Wait(); err != nil {
+		return "", err
+		//br.log.Printf("Command finished with error: %s", err)
+		// TODO: проверить как это работает на самом деле
+	}
+
+	return gopath + "/src/" + name, nil
 }
