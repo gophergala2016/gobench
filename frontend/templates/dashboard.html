@@ -4,6 +4,8 @@
     <div class="row">
         {{range .Packages}}
             {{.Url}}<br>
+        {{else}}
+            Your dashboard is empty. You can follow packages in search results.
         {{end}}
     </div>
 </section>

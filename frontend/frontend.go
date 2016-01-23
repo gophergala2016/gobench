@@ -52,6 +52,7 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 
 	f.router.Use(mw.Logger())
 	f.router.Use(mw.Recover())
+//	f.router.Use(frontendMiddleware())
 	f.router.Use(session.Sessions("ESESSION", f.store))
 
 	f.router.Static("/css", path.Join(f.cfg.AssetFolder, "/css"))
@@ -125,3 +126,15 @@ func (f *Frontend) Render(w io.Writer, name string, data interface{}) error {
 
 	return nil
 }
+
+//func frontendMiddleware() echo.MiddlewareFunc {
+//	return func(h echo.HandlerFunc) echo.HandlerFunc {
+//		return func(c *echo.Context) error {
+//			s := session.Default(c)
+//			user := s.Get("user")
+//			c.Set("user", user)
+//
+//			return nil
+//		}
+//	}
+//}

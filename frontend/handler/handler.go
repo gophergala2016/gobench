@@ -40,9 +40,5 @@ func (h *handler) NotFoundHandler(err error, c *echo.Context) {
 }
 
 func (h *handler) IndexGetHandler(c *echo.Context) error {
-	//	s := session.Default(c)
-	//  	fmt.Println(s.Get("user"))
-	// 	s.Set("user", time.Now().String())
-	// 	s.Save()
 	return c.Render(http.StatusOK, "index.html", nil)
 }

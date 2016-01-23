@@ -1,26 +1,28 @@
 {{define "content"}}
 
 <section class="container">
-  <div class="row">
-    <div class="col-xs-12">
-      {{range .Packages}}
-      <div class="box box-solid">
-            <a href="/asdf">
-        <div class="box-header with-border">
-          <h3 class="box-title">{{.Url}}</h3>
-        </div>
+    <div class="row">
+        <div class="col-xs-12">
+            {{range .Packages}}
+            <div class="box box-solid">
+                <a href="/asdf">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">{{.Url}}</h3>
+                    </div>
                 </a>
 
-        <!-- /.box-header -->
+                <!-- /.box-header -->
 
-        <div class="box-body">
-          asdfsad
+                <div class="box-body">
+                    asdfsad
+                </div>
+                <!-- /.box-body -->
+            </div>
+            {{else}}
+                Sorry, we found nothing :(
+            {{end}}
         </div>
-        <!-- /.box-body -->
-      </div>
-      {{end}}
     </div>
-  </div>
 </section>
 
 {{end}}
