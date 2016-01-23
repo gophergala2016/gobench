@@ -18,8 +18,8 @@ type databaseConfig struct {
 
 // Config holds backend configuration params
 type Config struct {
-	Mongo databaseConfig `json:"mongo"`
-	Debug bool           `json:"debug"`
+	Mongo  databaseConfig `json:"mongo"`
+	Debug  bool           `json:"debug"`
 }
 
 // Backend provides single point of access to business layer

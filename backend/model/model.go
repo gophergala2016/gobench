@@ -9,6 +9,7 @@ import (
 type Model struct {
 	Repository *Repository
 	Package    *Package
+	User       *User
 	logger     *log.Logger
 }
 
@@ -28,5 +29,11 @@ func New(db *mgo.Database, l *log.Logger) (*Model, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	m.User, err = NewUser(db)
+	if err != nil {
+		return nil, err
+	}
+
 	return m, nil
 }
