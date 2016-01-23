@@ -5,7 +5,11 @@
        "port":    27017,
        "name":   "gobench"
        },
-      "debug": true
+      "debug": true,
+      "github": {
+        "clientId": "",
+        "clientSecret": ""
+      }
    },
 
   "frontend" : {
