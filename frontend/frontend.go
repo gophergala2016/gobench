@@ -52,6 +52,7 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 
 	f.router.Use(mw.Logger())
 	f.router.Use(mw.Recover())
+//	f.router.Use(frontendMiddleware())
 	f.router.Use(session.Sessions("ESESSION", f.store))
 
 	f.router.Static("/css", path.Join(f.cfg.AssetFolder, "/css"))
@@ -63,10 +64,15 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 	h := handler.New(&f.cfg.HandlerCfg, f.store, f.back)
 	f.router.SetHTTPErrorHandler(h.NotFoundHandler)
 	f.router.Get("/", h.IndexGetHandler)
+	f.router.Get("/search",h.SearchbackHandler)
 	f.router.Get("/oauth", h.OauthRequestHandler)
 	f.router.Get("/oauth/callback", h.OauthCallbackHandler)
+<<<<<<< HEAD
 	f.router.Post("/api/task/next", h.ApiNextTaskHandler)
 	f.router.Post("/api/task/submit", h.ApiSubmitTaskResult)
+=======
+	f.router.Get("/dashboard", h.DashboardGetHandler)
+>>>>>>> master
 
 	return f, nil
 }
@@ -113,15 +119,27 @@ func (f *Frontend) Start() error {
 func (f *Frontend) Render(w io.Writer, name string, data interface{}) error {
 
 	// TODO: implement templates caching
-	tmpl, err := template.ParseGlob(path.Join(f.cfg.TemplateFolder, name))
+	tmpl, err := template.ParseFiles(path.Join(f.cfg.TemplateFolder, "layout.html"), path.Join(f.cfg.TemplateFolder, name))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("Template reading error. Details: %s", name, err.Error()))
 	}
 
-	err = tmpl.ExecuteTemplate(w, name, data)
+	err = tmpl.ExecuteTemplate(w, "layout", data)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("Template rendering error. Details: %s", name, err.Error()))
 	}
 
 	return nil
 }
+
+//func frontendMiddleware() echo.MiddlewareFunc {
+//	return func(h echo.HandlerFunc) echo.HandlerFunc {
+//		return func(c *echo.Context) error {
+//			s := session.Default(c)
+//			user := s.Get("user")
+//			c.Set("user", user)
+//
+//			return nil
+//		}
+//	}
+//}

@@ -18,9 +18,9 @@ type HandlerConfig struct {
 }
 
 type handler struct {
-	cfg     *HandlerConfig
-	store   session.CookieStore
-	back    *backend.Backend
+	cfg   *HandlerConfig
+	store session.CookieStore
+	back  *backend.Backend
 }
 
 func New(cfg *HandlerConfig, store session.CookieStore, b *backend.Backend) handler {
