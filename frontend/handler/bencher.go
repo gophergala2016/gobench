@@ -47,7 +47,7 @@ func (h *handler) ApiNextTaskHandler(c *echo.Context) error {
 	return c.JSON(http.StatusOK, task)
 }
 
-func (h *handler) SubmitTaskResult(c *echo.Context) error {
+func (h *handler) ApiSubmitTaskResult(c *echo.Context) error {
 
 	enc := json.NewDecoder(c.Request().Body)
 
