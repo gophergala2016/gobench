@@ -2,6 +2,7 @@ package backend
 
 import (
 	"fmt"
+	"github.com/gophergala2016/gobench/backend/job"
 	"github.com/gophergala2016/gobench/backend/model"
 	"labix.org/v2/mgo"
 	"log"
@@ -30,8 +31,8 @@ type Config struct {
 
 // Backend provides single point of access to business layer
 type Backend struct {
-	Model *model.Model
-
+	Model    *model.Model
+	Job      *job.Job
 	session  *mgo.Session
 	log      *log.Logger
 	dbConfig databaseConfig
@@ -62,12 +63,20 @@ func New(cfg *Config, l *log.Logger) (*Backend, error) {
 		return nil, err
 	}
 
+	b.Job, err = job.New(b.session.DB(b.dbConfig.Name), l)
+	if err != nil {
+		return nil, err
+	}
+
 	return b, nil
 }
 
 // Start launches background processes
 func (b *Backend) Start() error {
 
+	if err := b.Job.Start(); err != nil {
+		return err
+	}
 	return nil
 }
 
