@@ -53,7 +53,7 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 	f.router.Favicon(path.Join(f.cfg.AssetFolder, "/img/favicon.ico"))
 
 	// TODO
-	// f.router.SetHTTPErrorHandler(???)
+	f.router.SetHTTPErrorHandler(notFoundHandler)
 
 	return f, nil
 }
