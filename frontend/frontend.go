@@ -52,8 +52,8 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 	f.router.Static("/js", path.Join(f.cfg.AssetFolder, "/js"))
 	f.router.Favicon(path.Join(f.cfg.AssetFolder, "/img/favicon.ico"))
 
-	// TODO
 	f.router.SetHTTPErrorHandler(notFoundHandler)
+	f.router.Get("/", indexGetHandler)
 
 	return f, nil
 }
