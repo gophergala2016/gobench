@@ -2,6 +2,7 @@ package backend
 
 import (
 	"fmt"
+	"github.com/gophergala2016/gobench/backend/model"
 	"labix.org/v2/mgo"
 	"log"
 	"time"
@@ -25,6 +26,8 @@ type Backend struct {
 	session  *mgo.Session
 	log      *log.Logger
 	dbConfig databaseConfig
+
+	Model *model.Model
 }
 
 // New creates Backend instance, connects to database and initialise caches
@@ -45,6 +48,11 @@ func New(cfg *Config, l *log.Logger) (*Backend, error) {
 		log.Printf("Database connection error! Attempt: %d", a)
 		a++
 		time.Sleep(3 * time.Second)
+	}
+
+	b.Model, err = model.New(b.session.DB(b.dbConfig.Name), l)
+	if err != nil {
+		return nil, err
 	}
 
 	return b, nil
