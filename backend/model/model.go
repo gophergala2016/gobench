@@ -1,16 +1,24 @@
 package model
 
 import (
+	"errors"
 	"labix.org/v2/mgo"
 	"log"
 )
 
+var (
+	ErrAuthKey  = errors.New("Wrong authKey value!")
+	ErrNotFound = errors.New("Not found!")
+)
+
 // Model provides single point of access to all models
 type Model struct {
-	Repository *Repository
-	Package    *Package
-	User       *User
-	logger     *log.Logger
+	Repository      *Repository
+	Package         *Package
+	User            *User
+	TestEnvironment *TestEnvironment
+	Task            *Task
+	logger          *log.Logger
 }
 
 // New creates object Model
@@ -31,6 +39,16 @@ func New(db *mgo.Database, l *log.Logger) (*Model, error) {
 	}
 
 	m.User, err = NewUser(db)
+	if err != nil {
+		return nil, err
+	}
+
+	m.TestEnvironment, err = NewTestEnvironment(db)
+	if err != nil {
+		return nil, err
+	}
+
+	m.Task, err = NewTask(db)
 	if err != nil {
 		return nil, err
 	}

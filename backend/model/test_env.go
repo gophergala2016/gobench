@@ -7,25 +7,25 @@ import (
 
 // TestEnvironmentRow holds single test environment attributes
 type TestEnvironmentRow struct {
-	Id bson.ObjectId
+	Id bson.ObjectId `bson:"_id,omitempty"`
 
 	// AuthKey used by remote gobech client to retrive next task
 	// assigned to it
-	AuthKey string
+	AuthKey string `bson:"authKey"`
 
 	// Name presents on UI
-	Name string
+	Name string `bson:"name"`
 
 	// Specification holds description of testing environment
 	// filled manually or after the 1st execution
-	Specification string
+	Specification string `bson:"specification"`
 
 	// LastSpecification holds description of testing environment arrived
 	// together with last report
 	LastSpecification string
 
 	// Weight used for sorting. Small or slow test environments has less value
-	Weight int
+	Weight int `bson:"weight"`
 }
 
 // TestEnvironment is single point of access
@@ -42,6 +42,15 @@ func NewTestEnvironment(db *mgo.Database) (*TestEnvironment, error) {
 // Items returns all test environments sorted by Weight (asc)
 func (te *TestEnvironment) Items() ([]TestEnvironmentRow, error) {
 	items := make([]TestEnvironmentRow, 0)
-	err := te.coll.Find(nil).Sort("Weight").All(&items)
+	err := te.coll.Find(nil).Sort("weight").All(&items)
 	return items, err
+}
+
+// Exist checks existense of test environment by authKey
+func (te *TestEnvironment) Exist(authKey string) (bool, error) {
+	cnt, err := te.coll.Find(bson.M{"authKey": authKey}).Count()
+	if err != nil && err != mgo.ErrNotFound {
+		return false, err
+	}
+	return cnt > 0, nil
 }

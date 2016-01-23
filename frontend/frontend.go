@@ -65,6 +65,7 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 	f.router.Get("/", h.IndexGetHandler)
 	f.router.Get("/oauth", h.OauthRequestHandler)
 	f.router.Get("/oauth/callback", h.OauthCallbackHandler)
+	f.router.Post("/api/task/next", h.ApiNextTaskHandler)
 
 	return f, nil
 }

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"golang.org/x/tools/benchmark/parse"
+	"github.com/gophergala2016/gobench/common"
 	"io"
 	"io/ioutil"
 	"log"
@@ -16,27 +16,7 @@ import (
 	"time"
 )
 
-const baseUrl = "https://www.magnova.ru"
-
-type TaskRequest struct {
-	AuthKey string `json: "authKey"`
-	Email   string `json: "email"`
-}
-
-type TaskResponse struct {
-	PackageUrl string `json:"packageUrl"`
-}
-
-type TaskResult struct {
-	Config
-	AuthKey       string `json: "authKey"`
-	Email         string `json: "email"`
-	Specification string `json: "specification"`
-
-	// Result holds parsed bencmark results per GoMaxProc 1-8
-	Result  map[string]parse.Benchmark
-	BuildOk bool `json:"buildOk"`
-}
+const baseUrl = "http://127.0.0.1:8080"
 
 // BenchRunner represents goben.ch client attributes
 type BenchRunner struct {
@@ -116,19 +96,20 @@ func (br *BenchRunner) run() {
 
 func (br *BenchRunner) exec() {
 
-	packageName, ok, err := br.getNextTask()
+	task, ok, err := br.getNextTask()
 	if err != nil {
-		br.log.Println("Task request failed. Details: ", err)
-		time.Sleep(20 * time.Second)
-		return
-	}
-	if !ok {
-		br.log.Println("No tasks to do. Sleep 10s")
-		time.Sleep(10 * time.Second)
+		br.log.Println("Task request failed. Details: ", err, ". Sleep 5s")
+		time.Sleep(5 * time.Second)
 		return
 	}
 
-	br.log.Println("Next task to do: ", packageName)
+	if !ok {
+		br.log.Println("No packages to benchmark. Sleep 2s")
+		time.Sleep(2 * time.Second)
+		return
+	}
+
+	br.log.Println("Next package to bench: ", task.PackageUrl)
 
 	// TODO:
 	// 1. выкачиваем пакеты и зависимости
@@ -136,41 +117,92 @@ func (br *BenchRunner) exec() {
 	// 3. парсим ответ
 	// 4. отправляем на сервер, вместе с параметрами тестового окружения
 
+	result := common.TaskResult{Id: task.Id}
+	err = br.submitResult(&result)
+	if err != nil {
+		br.log.Println("Result submit failed")
+		return
+	}
+
+	br.log.Println("Result submited sucessfully")
+
 	return
 }
 
-// nextTask retrives next benchmarking task from goben.ch server
-func (br *BenchRunner) getNextTask() (string, bool, error) {
+// getNextTask retrives next benchmarking task from goben.ch server
+func (br *BenchRunner) getNextTask() (*common.TaskResponse, bool, error) {
 
-	taskReq := TaskRequest{AuthKey: br.authKey, Email: br.email}
-	buf, err := json.Marshal(taskReq)
+	buf, err := json.Marshal(common.TaskRequest{AuthKey: br.authKey, Email: br.email})
 	if err != nil {
-		return "", true, err
+		return nil, false, err
 	}
 
-	resp, err := br.client.Post(baseUrl+"/shop/api/signIn", "application/json; charset=UTF-8", bytes.NewReader(buf))
+	resp, err := br.client.Post(baseUrl+"/api/task/next", "application/json; charset=UTF-8", bytes.NewReader(buf))
 	if err != nil {
-		return "", true, err
+		return nil, false, err
+	}
+	defer resp.Body.Close()
+
+	// process sucessful response
+	if resp.StatusCode == http.StatusOK {
+		dec := json.NewDecoder(resp.Body)
+
+		var task common.TaskResponse
+
+		if err = dec.Decode(&task); err != nil {
+			return nil, false, err
+		}
+
+		return &task, len(task.PackageUrl) > 0, nil
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		// TODO: handle errors
+	// there is no package to process
+	if resp.StatusCode == http.StatusNoContent {
 		io.Copy(ioutil.Discard, resp.Body)
-		resp.Body.Close()
-		return "", true, errors.New(resp.Status)
+		return nil, false, nil
 	}
 
-	dec := json.NewDecoder(resp.Body)
+	// other server responses
+	buf, _ = ioutil.ReadAll(resp.Body)
+	return nil, false, errors.New(string(buf))
+}
 
-	var taskResp TaskResponse
+// submitResult sends benchmark result to goben.ch server
+func (br *BenchRunner) submitResult(result *common.TaskResult) error {
 
-	if err = dec.Decode(&taskResp); err != nil {
-		resp.Body.Close()
-		return "", true, errors.New(resp.Status)
+	buf, err := json.Marshal(result)
+	if err != nil {
+		return err
 	}
 
-	resp.Body.Close()
-	return taskResp.PackageUrl, true, nil
+	resp, err := br.client.Post(baseUrl+"/api/task/submit", "application/json; charset=UTF-8", bytes.NewReader(buf))
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// process sucessful response
+	if resp.StatusCode == http.StatusOK {
+		dec := json.NewDecoder(resp.Body)
+
+		var taskResp common.TaskResponse
+
+		if err = dec.Decode(&taskResp); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	// there is no package to process
+	if resp.StatusCode == http.StatusNoContent {
+		io.Copy(ioutil.Discard, resp.Body)
+		return nil
+	}
+
+	// unexpected error
+	buf, _ = ioutil.ReadAll(resp.Body)
+	return errors.New(string(buf))
 }
 
 func (br *BenchRunner) stop() {
