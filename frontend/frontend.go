@@ -113,12 +113,12 @@ func (f *Frontend) Start() error {
 func (f *Frontend) Render(w io.Writer, name string, data interface{}) error {
 
 	// TODO: implement templates caching
-	tmpl, err := template.ParseGlob(path.Join(f.cfg.TemplateFolder, name))
+	tmpl, err := template.ParseFiles(path.Join(f.cfg.TemplateFolder, "layout.html"), path.Join(f.cfg.TemplateFolder, name))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("Template reading error. Details: %s", name, err.Error()))
 	}
 
-	err = tmpl.ExecuteTemplate(w, name, data)
+	err = tmpl.ExecuteTemplate(w, "layout", data)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("Template rendering error. Details: %s", name, err.Error()))
 	}

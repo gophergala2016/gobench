@@ -49,20 +49,23 @@ func (h *handler) OauthCallbackHandler(c *echo.Context) error {
 	userLogin := *user.Login
 	userToken := token.AccessToken
 
-	s.Set("user", userLogin)
-	s.Set("token", userToken)
-	s.Save()
-
 	u := model.UserRow{
 		Login:     userLogin,
 		Token:     userToken,
 		AvatarURL: *user.AvatarURL,
 	}
-	err = h.back.Model.User.CreateUser(&u)
+	ci, err := h.back.Model.User.CreateUser(&u)
 	if err != nil {
 		log.Println(err.Error())
 		return c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
+
+	if (ci.Updated == 0) {
+		s.Set("just_signup", true)
+	}
+	s.Set("user", userLogin)
+	s.Set("token", userToken)
+	s.Save()
 
 	return c.Redirect(http.StatusFound, "/dashboard")
 }

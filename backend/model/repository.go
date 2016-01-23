@@ -45,6 +45,14 @@ func NewRepository(db *mgo.Database) (*Repository, error) {
 	return r, nil
 }
 
+func (r *Repository) Add(repo RepositoryRow) error {
+	_, err := r.coll.Upsert(bson.M{"url": repo.Url}, r)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Items returns all repositories
 func (r *Repository) Items(ids []string) ([]RepositoryRow, error) {
 	oids := make([]bson.ObjectId, len(ids))

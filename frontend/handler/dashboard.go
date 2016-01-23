@@ -3,8 +3,8 @@ package handler
 import (
 	"github.com/google/go-github/github"
 	"github.com/gophergala2016/gobench/backend/model"
-	"github.com/labstack/echo"
 	"github.com/syntaqx/echo-middleware/session"
+	"github.com/labstack/echo"
 	"golang.org/x/oauth2"
 	"log"
 	"net/http"
@@ -31,47 +31,61 @@ func (h *handler) DashboardGetHandler(c *echo.Context) error {
 	if (err != nil || user == &model.UserRow{}) {
 		return c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
-	var repos []model.RepositoryRow
-	if c.Query("just_signup") != "" {
-		tokenSource := &TokenSource{
-			AccessToken: user.Token,
-		}
-		oauthClient := oauth2.NewClient(oauth2.NoContext, tokenSource)
-		client := github.NewClient(oauthClient)
-		user, _, err := client.Users.Get("")
+	if s.Get("just_signup") != nil {
+		err = addUserRepos(h, user)
 		if err != nil {
 			log.Println(err)
 			return c.Redirect(http.StatusTemporaryRedirect, "/")
 		}
-
-		repoList, _, err := client.Repositories.List(*user.Login, &github.RepositoryListOptions{Type: "owner"})
-		if err != nil {
-			log.Println(err)
-			return c.Redirect(http.StatusTemporaryRedirect, "/")
-		}
-
-		for _, repo := range repoList {
-			if repo.Language != nil && *repo.Language == "Go" {
-				r := model.RepositoryRow{
-					Name:   *repo.Name,
-					Url:    strings.Replace(*repo.HTMLURL, "https://", "", -1),
-					Engine: model.Git,
-				}
-				repos = append(repos, r)
-			}
-		}
-	} else {
-		repos, err = h.back.Model.Repository.Items(user.Repos)
-		if err != nil {
-			log.Println(err)
-		}
+		s.Delete("just_signup")
+		s.Save()
+	}
+	packages, err := h.back.Model.Package.GetItemsByIdSlice(user.Repos)
+	if err != nil {
+		log.Println(err)
 	}
 
 	data := struct {
-		Repos []model.RepositoryRow
+		Packages []model.PackageRow
 	}{
-		repos,
+		packages,
 	}
 	return c.Render(http.StatusOK, "dashboard.html", data)
 
+}
+
+
+func addUserRepos(h *handler, u *model.UserRow) error {
+
+	tokenSource := &TokenSource{
+		AccessToken: u.Token,
+	}
+	oauthClient := oauth2.NewClient(oauth2.NoContext, tokenSource)
+	client := github.NewClient(oauthClient)
+	user, _, err := client.Users.Get("")
+	if err != nil {
+		return err
+	}
+
+	repoList, _, err := client.Repositories.List(*user.Login, &github.RepositoryListOptions{Type: "owner"})
+	if err != nil {
+		return err
+	}
+
+	for _, repo := range repoList {
+		if repo.Language != nil && *repo.Language == "Go" {
+			r := model.RepositoryRow{
+				Name:   *repo.Name,
+				Url:    strings.Replace(*repo.HTMLURL, "https://", "", -1),
+				Engine: model.Git,
+			}
+			err = h.back.Model.Repository.Add(r)
+			if err != nil {
+				log.Println(err)
+				return err
+			}
+		}
+	}
+
+	return nil
 }

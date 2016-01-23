@@ -30,12 +30,12 @@ func NewUser(db *mgo.Database) (*User, error) {
 	return u, nil
 }
 
-func (u *User) CreateUser(ur *UserRow) error {
-	_, err := u.coll.Upsert(bson.M{"login": ur.Login}, ur)
+func (u *User) CreateUser(ur *UserRow) (*mgo.ChangeInfo, error) {
+	ci, err := u.coll.Upsert(bson.M{"login": ur.Login}, ur)
 	if err != nil {
-		return err
+		return &mgo.ChangeInfo{}, err
 	}
-	return nil
+	return ci, nil
 }
 
 func (u *User) GetByLogin(login string) (*UserRow, error) {

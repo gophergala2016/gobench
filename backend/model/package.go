@@ -60,3 +60,16 @@ func (r *Package) Favorites(userName string) ([]PackageRow, error) {
 	}
 	return items, nil
 }
+
+// Items returns all repositories
+func (r *Package) GetItemsByIdSlice(ids []string) ([]PackageRow, error) {
+	oids := make([]bson.ObjectId, len(ids))
+	for i := range ids {
+		oids[i] = bson.ObjectIdHex(ids[i])
+	}
+	items := make([]PackageRow, 0)
+	if err := r.coll.Find(bson.M{"_id": bson.M{"$in": oids}}).All(&items); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
