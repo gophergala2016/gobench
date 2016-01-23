@@ -3,10 +3,12 @@ package frontend
 import (
 	"fmt"
 	"github.com/gophergala2016/gobench/backend"
-	"github.com/gophergala2016/gobench/frontend/handlers"
+	"github.com/gophergala2016/gobench/frontend/handler"
 	"github.com/hydrogen18/stoppableListener"
+	"github.com/gorilla/context"
 	"github.com/labstack/echo"
 	mw "github.com/labstack/echo/middleware"
+	"github.com/syntaqx/echo-middleware/session"
 	"html/template"
 	"io"
 	"log"
@@ -19,12 +21,15 @@ import (
 	"syscall"
 )
 
+
 // Config holds frontend configuration params
 type Config struct {
-	Host           string `json:"host"`
-	Port           int    `json:"port"`
-	TemplateFolder string `json:"templateFolder`
-	AssetFolder    string `json:"assetFolder`
+	Host             string                   `json:"host"`
+	Port             int                      `json:"port"`
+	TemplateFolder   string                   `json:"templateFolder`
+	AssetFolder      string                   `json:"assetFolder`
+	SessionSecretKey string                   `json:"sessionSecretKey`
+	HandlerCfg       handler.HandlerConfig    `json:"handler"`
 }
 
 //  Frontend provides single point of access to fronend layer
@@ -39,6 +44,8 @@ type Frontend struct {
 func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 	f := &Frontend{log: l, back: b, cfg: cfg, router: echo.New()}
 
+	store := session.NewCookieStore([]byte(f.cfg.SessionSecretKey))
+
 	f.router.SetRenderer(f)
 	f.router.HTTP2(false)
 
@@ -47,6 +54,8 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 
 	f.router.Use(mw.Logger())
 	f.router.Use(mw.Recover())
+	f.router.Use(session.Sessions("ESESSION", store))
+
 
 	f.router.Static("/css", path.Join(f.cfg.AssetFolder, "/css"))
 	f.router.Static("/img", path.Join(f.cfg.AssetFolder, "/img"))
@@ -54,8 +63,11 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 	f.router.Static("/fonts", path.Join(f.cfg.AssetFolder, "/fonts"))
 	f.router.Favicon(path.Join(f.cfg.AssetFolder, "/img/favicon.ico"))
 
-	f.router.SetHTTPErrorHandler(handlers.NotFoundHandler)
-	f.router.Get("/", handlers.IndexGetHandler)
+	h := handler.New(&f.cfg.HandlerCfg)
+	f.router.SetHTTPErrorHandler(h.NotFoundHandler)
+	f.router.Get("/", h.IndexGetHandler)
+	f.router.Get("/oauth", h.OauthRequestHandler)
+	f.router.Get("/oauth/callback", h.OauthCallbackHandler)
 
 	return f, nil
 }
@@ -74,7 +86,7 @@ func (f *Frontend) Start() error {
 		return err
 	}
 
-	server := http.Server{Handler: f.router}
+	server := http.Server{Handler: context.ClearHandler(f.router)}
 
 	stop := make(chan os.Signal)
 	signal.Notify(stop, syscall.SIGINT)

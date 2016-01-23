@@ -16,17 +16,10 @@ type databaseConfig struct {
 	Name string `json:"name"`
 }
 
-// GithubConfig holds GitHub app credentials
-type githubConfig struct {
-	clientId     string `json:"clientId"`
-	clientSecret string `json:"clienSecret"`
-}
-
 // Config holds backend configuration params
 type Config struct {
 	Mongo  databaseConfig `json:"mongo"`
 	Debug  bool           `json:"debug"`
-	Github githubConfig   `json:"github"`
 }
 
 // Backend provides single point of access to business layer

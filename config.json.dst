@@ -5,17 +5,20 @@
        "port":    27017,
        "name":   "gobench"
        },
-      "debug": true,
-      "github": {
-        "clientId": "",
-        "clientSecret": ""
-      }
+      "debug": true
    },
 
   "frontend" : {
 	"templateFolder" : "./frontend/templates",
 	"assetFolder" : "./frontend/assets",
 	"port" : 8080,
-	"host" : "127.0.0.1"
+	"host" : "127.0.0.1",
+    "sessionSecretKey": "verySecretKey",
+    "handler": {
+      "github": {
+        "clientId": "",
+        "clientSecret": ""
+      }
+    }
   }
 }
