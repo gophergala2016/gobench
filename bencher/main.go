@@ -19,11 +19,17 @@ func main() {
 
 func realMain() int {
 
+	// important to have GOPATH defined
+	if _, ok := os.LookupEnv("GOPATH"); !ok {
+		fmt.Println("Environment variabe GOPATH not found!")
+		return 1
+	}
+
 	// reads config from file
 	config, err := ReadConfig("./config.json")
 	if err != nil {
 		fmt.Println("Config file reading error. Details: ", err)
-		return 1
+		return 2
 	}
 
 	// creates Logger (can be replaced with other popular logger)
@@ -33,7 +39,7 @@ func realMain() int {
 	br, err := NewBenchClient(config.AuthKey, config.Email, log)
 	if err != nil {
 		log.Println("BenchRunner init failed. Details: ", err)
-		return 2
+		return 3
 	}
 
 	// Ctrl+C grcefully terminates application

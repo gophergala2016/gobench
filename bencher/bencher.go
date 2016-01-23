@@ -11,7 +11,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"os/signal"
 	"runtime"
 	"sync"
@@ -20,13 +19,14 @@ import (
 )
 
 const (
-	baseUrl         = "http://127.0.0.1:8080"
-	debug           = true
-	nextTaskUrl     = baseUrl + "/api/task/next"
-	submitResultUrl = baseUrl + "/api/task/submit"
+	baseUrl           = "http://127.0.0.1:8080"
+	debug             = true
+	nextTaskUrl       = baseUrl + "/api/task/next"
+	submitResultUrl   = baseUrl + "/api/task/submit"
+	maxSubmitAttepmts = 5
 )
 
-// BenchClient implements client to goben.ch server
+// BenchClient implements client interface to goben.ch server
 type BenchClient struct {
 	client        *http.Client
 	log           *log.Logger
@@ -48,25 +48,31 @@ func NewBenchClient(authKey, email string, l *log.Logger) (*BenchClient, error) 
 
 	// TODO: identify current machine specification: RAM, CPU, OS, etc.
 	// save to br.specification
+	br.specification = "Bare metal/Intel i5-5200K, 4 core, Ubuntu 14.04, RAM: 16G"
 
 	err := br.Ping()
 	if err != nil && debug == false {
-		// if debug mode is on, exit with error
+		// exit with error in debug mode
 		return nil, err
 	}
 	return br, nil
 }
 
-// Ping checks server availability
+// Ping checks goben.ch availability
 func (br *BenchClient) Ping() error {
+	return br.ping()
+}
 
+func (br *BenchClient) ping() error {
+
+	// TODO: process HTTP 301
 	resp, err := br.client.Head(baseUrl)
 	if err != nil {
 		return err
 	}
+	_, err = io.Copy(ioutil.Discard, resp.Body)
 	resp.Body.Close()
-
-	return nil
+	return err
 }
 
 // Run starts goben.ch client
@@ -125,7 +131,7 @@ func (br *BenchClient) execTask() {
 	br.log.Println("Next task to fullfil: Benchmark ", task.PackageUrl)
 	result := common.TaskResult{Id: task.Id, Round: make(map[string]parse.Set)}
 
-	// Download target package
+	// download target package
 	fPath, err := downloadPackage(task.PackageUrl)
 	if err != nil {
 		br.log.Printf("Package download failed. Details: %s", err)
@@ -133,7 +139,7 @@ func (br *BenchClient) execTask() {
 	}
 	br.log.Println("Package downloaded")
 
-	// Donwload target package dependencies
+	// download target package dependencies
 	err = downloadPackageDependencies(fPath)
 	if err != nil {
 		br.log.Printf("Package dependencies download failed. Details: %s", err)
@@ -149,15 +155,21 @@ func (br *BenchClient) execTask() {
 
 	}
 
-	// 4. отправляем на сервер, вместе с параметрами тестового окружения
-
-	err = br.submitResult(&result)
-	if err != nil {
-		br.log.Println("Result submit failed")
-		return
+	// several attepmts to submit task execution results
+	for i := 0; i < maxSubmitAttepmts; i++ {
+		br.log.Printf("Result submit attempt: %d", i+1)
+		clean, err := br.submitResult(&result)
+		if err != nil {
+			br.log.Printf("Result submit failed. Details: %s", err)
+			if clean {
+				break
+			}
+			time.Sleep(2 * time.Second)
+			continue
+		}
+		br.log.Println("Result submited sucessfully")
+		break
 	}
-
-	br.log.Println("Result submited sucessfully")
 
 	return
 }
@@ -201,56 +213,33 @@ func (br *BenchClient) getNextTask() (*common.TaskResponse, bool, error) {
 }
 
 // submitResult sends task result to goben.ch server
-func (br *BenchClient) submitResult(result *common.TaskResult) error {
+func (br *BenchClient) submitResult(result *common.TaskResult) (bool, error) {
 
 	buf, err := json.Marshal(result)
 	if err != nil {
-		return err
+		return true, err
 	}
 
 	resp, err := br.client.Post(submitResultUrl, "application/json; charset=UTF-8", bytes.NewReader(buf))
 	if err != nil {
-		return err
+		return true, err
 	}
 	defer resp.Body.Close()
 
 	// process sucessful response
 	if resp.StatusCode == http.StatusOK {
 		io.Copy(ioutil.Discard, resp.Body)
-		return nil
+		return true, nil
 	}
 
-	// unexpected error
+	// unknown tasks id or authKey, task is already done
+	clean := resp.StatusCode == http.StatusBadRequest
+
+	// process unexpeted error
 	buf, _ = ioutil.ReadAll(resp.Body)
-	return errors.New(string(buf))
+	return clean, errors.New(string(buf))
 }
 
 func (br *BenchClient) stop() {
 	close(br.stopCh)
-}
-
-func downloadPackageDependencies(name string) error {
-
-	return nil
-}
-
-func downloadPackage(name string) (string, error) {
-
-	gopath, ok := os.LookupEnv("GOPATH")
-	if !ok {
-		return "", errors.New("Environment variable GOPATH not found")
-	}
-
-	cmd := exec.Command("go", "get", name)
-	err := cmd.Start()
-	if err != nil {
-		return "", err
-	}
-	if err = cmd.Wait(); err != nil {
-		return "", err
-		//br.log.Printf("Command finished with error: %s", err)
-		// TODO: проверить как это работает на самом деле
-	}
-
-	return gopath + "/src/" + name, nil
 }
