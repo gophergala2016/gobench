@@ -3,6 +3,7 @@ package frontend
 import (
 	"fmt"
 	"github.com/gophergala2016/gobench/backend"
+	"github.com/gophergala2016/gobench/frontend/handlers"
 	"github.com/hydrogen18/stoppableListener"
 	"github.com/labstack/echo"
 	mw "github.com/labstack/echo/middleware"
@@ -53,8 +54,8 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 	f.router.Static("/fonts", path.Join(f.cfg.AssetFolder, "/fonts"))
 	f.router.Favicon(path.Join(f.cfg.AssetFolder, "/img/favicon.ico"))
 
-	f.router.SetHTTPErrorHandler(notFoundHandler)
-	f.router.Get("/", indexGetHandler)
+	f.router.SetHTTPErrorHandler(handlers.NotFoundHandler)
+	f.router.Get("/", handlers.IndexGetHandler)
 
 	return f, nil
 }
