@@ -52,7 +52,7 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 
 	f.router.Use(mw.Logger())
 	f.router.Use(mw.Recover())
-//	f.router.Use(frontendMiddleware())
+	//	f.router.Use(frontendMiddleware())
 	f.router.Use(session.Sessions("ESESSION", f.store))
 
 	f.router.Static("/css", path.Join(f.cfg.AssetFolder, "/css"))
@@ -64,15 +64,12 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 	h := handler.New(&f.cfg.HandlerCfg, f.store, f.back)
 	f.router.SetHTTPErrorHandler(h.NotFoundHandler)
 	f.router.Get("/", h.IndexGetHandler)
-	f.router.Get("/search",h.SearchbackHandler)
+	f.router.Get("/search", h.SearchbackHandler)
 	f.router.Get("/oauth", h.OauthRequestHandler)
 	f.router.Get("/oauth/callback", h.OauthCallbackHandler)
-<<<<<<< HEAD
 	f.router.Post("/api/task/next", h.ApiNextTaskHandler)
 	f.router.Post("/api/task/submit", h.ApiSubmitTaskResult)
-=======
 	f.router.Get("/dashboard", h.DashboardGetHandler)
->>>>>>> master
 
 	return f, nil
 }
