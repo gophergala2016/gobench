@@ -4,10 +4,10 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/gophergala2016/gobench/backend/model"
 	"github.com/labstack/echo"
-	"github.com/labstack/gommon/log"
 	"github.com/syntaqx/echo-middleware/session"
 	"golang.org/x/oauth2"
 	githuboauth "golang.org/x/oauth2/github"
+	"log"
 	"net/http"
 )
 
@@ -34,7 +34,7 @@ func (h *handler) OauthCallbackHandler(c *echo.Context) error {
 	code := c.Query("code")
 	token, err := oauthConf.Exchange(oauth2.NoContext, code)
 	if err != nil {
-		log.Error(err)
+		log.Println(err.Error())
 		return c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 
@@ -42,24 +42,30 @@ func (h *handler) OauthCallbackHandler(c *echo.Context) error {
 	client := github.NewClient(oauthClient)
 	user, _, err := client.Users.Get("")
 	if err != nil {
-		log.Error(err)
+		log.Println(err.Error())
 		return c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 
-	s.Set("user", user)
-	s.Set("token", token)
-	s.Save()
+	userLogin := *user.Login
+	userToken := token.AccessToken
 
 	u := model.UserRow{
-		Login:     *user.Login,
-		Token:     token.AccessToken,
+		Login:     userLogin,
+		Token:     userToken,
 		AvatarURL: *user.AvatarURL,
 	}
-	err = h.back.Model.User.CreateUser(&u)
+	ci, err := h.back.Model.User.CreateUser(&u)
 	if err != nil {
-		log.Error(err)
+		log.Println(err.Error())
 		return c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
+
+	if (ci.Updated == 0) {
+		s.Set("just_signup", true)
+	}
+	s.Set("user", userLogin)
+	s.Set("token", userToken)
+	s.Save()
 
 	return c.Redirect(http.StatusFound, "/dashboard")
 }

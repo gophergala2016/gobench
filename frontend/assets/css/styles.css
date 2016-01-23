@@ -11,7 +11,7 @@ author: bootply.com
 
 html,body {
 	height:100%;
-    background:center no-repeat fixed url('/assets/example/bg_suburb.jpg');
+    background:#e5e5ef;
     background-size: cover;
 }
 
@@ -42,7 +42,7 @@ html,body {
 section {
 	padding-top:70px;  
     padding-bottom:50px; 
-    min-height:calc(100% - 1px);
+    min-height:calc(100% - 203px);
 }
 
 .v-center {
@@ -104,4 +104,34 @@ footer .nav>li>a {
 footer .nav>li>a:hover {
     background-color:transparent;
 	color:#fff;
+}
+
+.box {
+    position: relative;
+    border-radius: 3px;
+    background: #ffffff;
+    border-top: 3px solid #d2d6de;
+    margin-bottom: 20px;
+    width: 100%;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+.box-title {
+    display: inline-block;
+    font-size: 18px;
+    margin: 0;
+    line-height: 1;
+}
+.box-header {
+    color: #444;
+    display: block;
+    padding: 10px;
+    position: relative;
+}
+
+.box-body {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    padding: 10px;
 }
