@@ -36,7 +36,7 @@ func NewPackage(db *mgo.Database) (*Package, error) {
 
 func (r *Package) GetItem(name string) ([]PackageRow, error) {
       item := make([]PackageRow,0)
-      if err := r.coll.Find(nil).Limit(1).All(&item); err != nil {
+      if err := r.coll.Find(bson.M{"url": bson.RegEx{name,""}}).All(&item); err != nil {
 		  return nil, err
 	  }
 	 return item, nil
