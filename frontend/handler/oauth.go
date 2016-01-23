@@ -55,12 +55,11 @@ func (h *handler) OauthCallbackHandler(c *echo.Context) error {
 		Token:     token.AccessToken,
 		AvatarURL: *user.AvatarURL,
 	}
-	err = h.backend.Model.User.CreateUser(&u)
+	err = h.back.Model.User.CreateUser(&u)
 	if err != nil {
 		log.Error(err)
 		return c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
-	//	fmt.Println(client.Repositories.List(*user.Login, &github.RepositoryListOptions{Type: "owner"}))
 
 	return c.Redirect(http.StatusFound, "/dashboard")
 }
