@@ -30,12 +30,13 @@ func realMain() int {
 	log := log.New(os.Stdout, "BEN ", log.Ldate|log.Ltime)
 	log.Println("Application launched")
 
-	br, err := NewBenchRunner(config.AuthKey, config.Email, log)
+	br, err := NewBenchClient(config.AuthKey, config.Email, log)
 	if err != nil {
 		log.Println("BenchRunner init failed. Details: ", err)
 		return 2
 	}
 
+	// Ctrl+C grcefully terminates application
 	br.Run()
 
 	log.Println("Application succesfully terminated")

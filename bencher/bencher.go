@@ -5,45 +5,58 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gophergala2016/gobench/common"
+	"golang.org/x/tools/benchmark/parse"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"os/signal"
+	"runtime"
 	"sync"
 	"syscall"
 	"time"
 )
 
-const baseUrl = "http://127.0.0.1:8080"
+const (
+	baseUrl = "http://127.0.0.1:8080"
+	debug   = true
+)
 
-// BenchRunner represents goben.ch client attributes
-type BenchRunner struct {
-	client  *http.Client
-	log     *log.Logger
-	stopCh  chan os.Signal
-	authKey string `json: "authKey"`
-	email   string `json: "email"`
+// BenchClient implements client to goben.ch server
+type BenchClient struct {
+	client        *http.Client
+	log           *log.Logger
+	authKey       string
+	email         string
+	stopCh        chan os.Signal
+	specification string
 }
 
-// NewBenchRunner creates BenchRunner instance
-func NewBenchRunner(authKey, email string, l *log.Logger) (*BenchRunner, error) {
+// NewBenchClient creates BenchClient instance
+func NewBenchClient(authKey, email string, l *log.Logger) (*BenchClient, error) {
 
-	// TODO: определяем параметры тестового окружения
-	br := &BenchRunner{authKey: authKey, email: email,
-		client: &http.Client{Timeout: 2 * time.Second},
-		log:    l}
+	br := &BenchClient{
+		authKey: authKey,
+		email:   email,
+		client:  &http.Client{Timeout: 2 * time.Second},
+		log:     l,
+	}
+
+	// TODO: identify current machine specification: RAM, CPU, OS, etc.
+	// save to br.specification
 
 	err := br.Ping()
-	if err != nil {
+	if err != nil && debug == false {
+		// if debug mode is on, exit with error
 		return nil, err
 	}
 	return br, nil
 }
 
 // Ping checks server availability
-func (br *BenchRunner) Ping() error {
+func (br *BenchClient) Ping() error {
 
 	resp, err := br.client.Head(baseUrl)
 	if err != nil {
@@ -55,7 +68,7 @@ func (br *BenchRunner) Ping() error {
 }
 
 // Run starts goben.ch client
-func (br *BenchRunner) Run() {
+func (br *BenchClient) Run() {
 
 	br.stopCh = make(chan os.Signal)
 	signal.Notify(br.stopCh, syscall.SIGINT)
@@ -78,7 +91,7 @@ func (br *BenchRunner) Run() {
 	return
 }
 
-func (br *BenchRunner) run() {
+func (br *BenchClient) run() {
 
 	for {
 		select {
@@ -87,14 +100,12 @@ func (br *BenchRunner) run() {
 		default:
 			//If the channel is still open, continue as normal
 		}
-
-		br.exec()
+		br.execTask()
 	}
-
 	return
 }
 
-func (br *BenchRunner) exec() {
+func (br *BenchClient) execTask() {
 
 	task, ok, err := br.getNextTask()
 	if err != nil {
@@ -104,20 +115,46 @@ func (br *BenchRunner) exec() {
 	}
 
 	if !ok {
-		br.log.Println("No packages to benchmark. Sleep 2s")
+		br.log.Println("No task assigned. Sleep 2s")
 		time.Sleep(2 * time.Second)
 		return
 	}
 
-	br.log.Println("Next package to bench: ", task.PackageUrl)
+	br.log.Println("Next task to fullfil: Benchmark ", task.PackageUrl)
+	result := common.TaskResult{Id: task.Id, Round: make(map[string]parse.Set)}
 
-	// TODO:
-	// 1. выкачиваем пакеты и зависимости
-	// 2. прогоняем go test bench и т.д
-	// 3. парсим ответ
+	// Download target package
+	cmd := exec.Command("go", "get", task.PackageUrl)
+	err = cmd.Start()
+	if err != nil {
+		br.log.Printf("Package download failed. Details: %s", err)
+		// TODO: inform server abour problem
+		return
+	}
+
+	log.Printf("Waiting for command to finish...")
+	if err = cmd.Wait(); err != nil {
+		br.log.Printf("Command finished with error: %s", err)
+		// TODO: проверить как это работает на самом деле
+	}
+
+	// Donwload dependencies
+	// TODO
+
+	//
+	//br.log.Println(err, string(buf))
+	os.Exit(0)
+
+	// Отсюда и ниже уже
+
+	// 2. прогоняем go test bench для разного количества GOMAXPROCSs
+	for i := 0; i < runtime.NumCPU(); i++ {
+		// 3. парсим ответ
+
+	}
+
 	// 4. отправляем на сервер, вместе с параметрами тестового окружения
 
-	result := common.TaskResult{Id: task.Id}
 	err = br.submitResult(&result)
 	if err != nil {
 		br.log.Println("Result submit failed")
@@ -130,7 +167,7 @@ func (br *BenchRunner) exec() {
 }
 
 // getNextTask retrives next benchmarking task from goben.ch server
-func (br *BenchRunner) getNextTask() (*common.TaskResponse, bool, error) {
+func (br *BenchClient) getNextTask() (*common.TaskResponse, bool, error) {
 
 	buf, err := json.Marshal(common.TaskRequest{AuthKey: br.authKey, Email: br.email})
 	if err != nil {
@@ -168,7 +205,7 @@ func (br *BenchRunner) getNextTask() (*common.TaskResponse, bool, error) {
 }
 
 // submitResult sends benchmark result to goben.ch server
-func (br *BenchRunner) submitResult(result *common.TaskResult) error {
+func (br *BenchClient) submitResult(result *common.TaskResult) error {
 
 	buf, err := json.Marshal(result)
 	if err != nil {
@@ -205,6 +242,6 @@ func (br *BenchRunner) submitResult(result *common.TaskResult) error {
 	return errors.New(string(buf))
 }
 
-func (br *BenchRunner) stop() {
+func (br *BenchClient) stop() {
 	close(br.stopCh)
 }

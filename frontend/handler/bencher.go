@@ -41,7 +41,7 @@ func (h *handler) ApiNextTaskHandler(c *echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
-	task := common.TaskResponse{Id: taskRow.Id.String(), PackageUrl: taskRow.PackageUrl}
+	task := common.TaskResponse{Id: taskRow.Id.String(), PackageUrl: taskRow.PackageUrl, Type: "benchmark"}
 	fmt.Printf("%#v\n%#v\n%#v\n", taskReq, taskRow, task)
 
 	return c.JSON(http.StatusOK, task)
