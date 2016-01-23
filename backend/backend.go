@@ -23,11 +23,11 @@ type Config struct {
 
 // Backend provides single point of access to business layer
 type Backend struct {
+	Model *model.Model
+
 	session  *mgo.Session
 	log      *log.Logger
 	dbConfig databaseConfig
-
-	Model *model.Model
 }
 
 // New creates Backend instance, connects to database and initialise caches

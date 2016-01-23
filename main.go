@@ -40,15 +40,15 @@ func realMain() int {
 		return 3
 	}
 
-	// start background processes
+	// starts background processes
 	if err := back.Start(); err != nil {
 		log.Println("Backend processes launching error. Details: ", err)
 		return 4
 	}
 
-	// start HTTP listener and handlers
+	// starts HTTP listener and handlers
 	if err := front.Start(); err != nil {
-		log.Println("Fronend listeners/processes error. Details: ", err)
+		log.Println("Frontend listeners/processes error. Details: ", err)
 		return 5
 	}
 
