@@ -16,6 +16,8 @@ type UserRow struct {
 
 	// User avatar
 	AvatarURL string
+
+	Repos []string
 }
 
 type User struct {
@@ -36,10 +38,10 @@ func (u *User) CreateUser(ur *UserRow) error {
 	return nil
 }
 
-func (u *User) GetByLogin(login string) (UserRow, error) {
+func (u *User) GetByLogin(login string) (*UserRow, error) {
 	ur := new(UserRow)
-	if err := u.coll.Find(bson.M{"login": login}).One(&ur); err != mgo.ErrNotFound {
-		return UserRow{}, err
+	if err := u.coll.Find(bson.M{"login": login}).One(&ur); err != nil {
+		return &UserRow{}, err
 	}
-	return *ur, nil
+	return ur, nil
 }

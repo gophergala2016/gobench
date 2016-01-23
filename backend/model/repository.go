@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 )
@@ -45,9 +46,14 @@ func NewRepository(db *mgo.Database) (*Repository, error) {
 }
 
 // Items returns all repositories
-func (r *Repository) Items() ([]RepositoryRow, error) {
+func (r *Repository) Items(ids []string) ([]RepositoryRow, error) {
+	oids := make([]bson.ObjectId, len(ids))
+	for i := range ids {
+		oids[i] = bson.ObjectIdHex(ids[i])
+	}
 	items := make([]RepositoryRow, 0)
-	if err := r.coll.Find(nil).All(&items); err != mgo.ErrNotFound {
+	if err := r.coll.Find(bson.M{"_id": bson.M{"$in": oids}}).All(&items); err != nil {
+		fmt.Println(items)
 		return nil, err
 	}
 	return items, nil
