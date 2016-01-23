@@ -16,6 +16,9 @@ func (h *handler) SearchbackHandler(c *echo.Context) error {
 		  log.Error(err)
 		  return c.Redirect(http.StatusTemporaryRedirect, "/")
 	  }
+	if len(searchq) > 50 && len(searchq) < 4 {
+		return c.Redirect(http.StatusBadRequest,"/")
+	}
 	data := struct {
 		Packages []model.PackageRow
 	}{
