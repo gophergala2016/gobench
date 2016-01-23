@@ -1,10 +1,9 @@
 package handler
 
 import (
+	"github.com/gophergala2016/gobench/backend"
 	"github.com/labstack/echo"
-	"github.com/syntaqx/echo-middleware/session"
 	"net/http"
-	"fmt"
 )
 
 // GithubConfig holds GitHub app credentials
@@ -13,16 +12,17 @@ type githubConfig struct {
 	ClientSecret string `json:"clientSecret"`
 }
 
-type HandlerConfig struct  {
+type HandlerConfig struct {
 	Github githubConfig `json:"github"`
 }
 
 type handler struct {
-	cfg *HandlerConfig
+	cfg     *HandlerConfig
+	backend *backend.Backend
 }
 
-func New(cfg *HandlerConfig) handler  {
-	return handler{cfg: cfg}
+func New(cfg *HandlerConfig, b *backend.Backend) handler {
+	return handler{cfg: cfg, backend: b}
 }
 
 func (h *handler) NotFoundHandler(err error, c *echo.Context) {
@@ -38,7 +38,5 @@ func (h *handler) NotFoundHandler(err error, c *echo.Context) {
 }
 
 func (h *handler) IndexGetHandler(c *echo.Context) error {
-	s := session.Default(c)
-	fmt.Println(s.Get("user"))
 	return c.Render(http.StatusOK, "index.html", nil)
 }

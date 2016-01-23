@@ -1,22 +1,24 @@
 package handler
 
 import (
+	"github.com/google/go-github/github"
+	"github.com/gophergala2016/gobench/backend/model"
 	"github.com/labstack/echo"
+	"github.com/labstack/gommon/log"
+	"github.com/syntaqx/echo-middleware/session"
 	"golang.org/x/oauth2"
 	githuboauth "golang.org/x/oauth2/github"
-	"github.com/google/go-github/github"
-	"github.com/syntaqx/echo-middleware/session"
 	"net/http"
-	"github.com/labstack/gommon/log"
 )
+
 var oauthConf = &oauth2.Config{
-	Scopes:       []string{"user:email", "repo"},
-	Endpoint:     githuboauth.Endpoint,
+	Scopes:   []string{"user:email", "repo"},
+	Endpoint: githuboauth.Endpoint,
 }
 
 func (h *handler) OauthRequestHandler(c *echo.Context) error {
 	s := session.Default(c)
-	if (s.Get("user") != nil) {
+	if s.Get("user") != nil {
 		return c.Redirect(http.StatusFound, "/dashboard")
 	}
 
@@ -45,7 +47,20 @@ func (h *handler) OauthCallbackHandler(c *echo.Context) error {
 	}
 
 	s.Set("user", user)
+	s.Set("token", token)
 	s.Save()
+
+	u := model.UserRow{
+		Login:     *user.Login,
+		Token:     token.AccessToken,
+		AvatarURL: *user.AvatarURL,
+	}
+	err = h.backend.Model.User.CreateUser(&u)
+	if err != nil {
+		log.Error(err)
+		return c.Redirect(http.StatusTemporaryRedirect, "/")
+	}
+	//	fmt.Println(client.Repositories.List(*user.Login, &github.RepositoryListOptions{Type: "owner"}))
 
 	return c.Redirect(http.StatusFound, "/dashboard")
 }

@@ -63,7 +63,7 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 	f.router.Static("/fonts", path.Join(f.cfg.AssetFolder, "/fonts"))
 	f.router.Favicon(path.Join(f.cfg.AssetFolder, "/img/favicon.ico"))
 
-	h := handler.New(&f.cfg.HandlerCfg)
+	h := handler.New(&f.cfg.HandlerCfg, f.back)
 	f.router.SetHTTPErrorHandler(h.NotFoundHandler)
 	f.router.Get("/", h.IndexGetHandler)
 	f.router.Get("/oauth", h.OauthRequestHandler)
