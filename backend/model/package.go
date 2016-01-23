@@ -10,16 +10,16 @@ type PackageRow struct {
 	Id bson.ObjectId
 
 	// Url
-	Url string
+	Url string `bson: "url"`
 
 	// Description of the package
-	Description string
+	Description string `bson:"description"`
 
 	// Repository's engine
-	Engine RepositoryEngine
+	Engine RepositoryEngine `bson:"engine`
 
 	// PackageCount holds amount of packages store in the repository
-	PackageCount int `bson:"-"`
+	PackageCount int `bson:"packagecount"`
 }
 
 // Package provides single point of access to all packages
@@ -32,6 +32,14 @@ type Package struct {
 func NewPackage(db *mgo.Database) (*Package, error) {
 	r := &Package{db: db, coll: db.C("Package")}
 	return r, nil
+}
+
+func (r *Package) GetItem(name string) ([]PackageRow, error) {
+      item := make([]PackageRow,0)
+      if err := r.coll.Find(nil).Limit(1).All(&item); err != nil {
+		  return nil, err
+	  }
+	 return item, nil
 }
 
 // Items returns all packages

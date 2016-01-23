@@ -63,6 +63,7 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 	h := handler.New(&f.cfg.HandlerCfg, f.store, f.back)
 	f.router.SetHTTPErrorHandler(h.NotFoundHandler)
 	f.router.Get("/", h.IndexGetHandler)
+	f.router.Get("/search",h.SearchbackHandler)
 	f.router.Get("/oauth", h.OauthRequestHandler)
 	f.router.Get("/oauth/callback", h.OauthCallbackHandler)
 
