@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"fmt"
+	"time"
+	//	"github.com/gorilla/context"
 	"github.com/labstack/echo"
 	"github.com/syntaqx/echo-middleware/session"
 	"net/http"
-	"fmt"
 )
 
 // GithubConfig holds GitHub app credentials
@@ -13,16 +15,17 @@ type githubConfig struct {
 	ClientSecret string `json:"clientSecret"`
 }
 
-type HandlerConfig struct  {
+type HandlerConfig struct {
 	Github githubConfig `json:"github"`
 }
 
 type handler struct {
-	cfg *HandlerConfig
+	cfg   *HandlerConfig
+	store session.CookieStore
 }
 
-func New(cfg *HandlerConfig) handler  {
-	return handler{cfg: cfg}
+func New(cfg *HandlerConfig, store session.CookieStore) handler {
+	return handler{cfg: cfg, store: store}
 }
 
 func (h *handler) NotFoundHandler(err error, c *echo.Context) {
@@ -40,5 +43,7 @@ func (h *handler) NotFoundHandler(err error, c *echo.Context) {
 func (h *handler) IndexGetHandler(c *echo.Context) error {
 	s := session.Default(c)
 	fmt.Println(s.Get("user"))
+	s.Set("user", time.Now().String())
+	s.Save()
 	return c.Render(http.StatusOK, "index.html", nil)
 }
