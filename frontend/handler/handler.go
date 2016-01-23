@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/gophergala2016/gobench/backend"
 	"github.com/labstack/echo"
+	"github.com/syntaqx/echo-middleware/session"
 	"net/http"
 )
 
@@ -17,12 +18,13 @@ type HandlerConfig struct {
 }
 
 type handler struct {
-	cfg     *HandlerConfig
+	cfg   *HandlerConfig
+	store session.CookieStore
 	backend *backend.Backend
 }
 
-func New(cfg *HandlerConfig, b *backend.Backend) handler {
-	return handler{cfg: cfg, backend: b}
+func New(cfg *HandlerConfig, store session.CookieStore, b *backend.Backend) handler {
+	return handler{cfg: cfg, store: store, b *backend.Backend}
 }
 
 func (h *handler) NotFoundHandler(err error, c *echo.Context) {
