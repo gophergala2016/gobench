@@ -20,8 +20,10 @@ import (
 )
 
 const (
-	baseUrl = "http://127.0.0.1:8080"
-	debug   = true
+	baseUrl         = "http://127.0.0.1:8080"
+	debug           = true
+	nextTaskUrl     = baseUrl + "/api/task/next"
+	submitResultUrl = baseUrl + "/api/task/submit"
 )
 
 // BenchClient implements client to goben.ch server
@@ -168,7 +170,7 @@ func (br *BenchClient) getNextTask() (*common.TaskResponse, bool, error) {
 		return nil, false, err
 	}
 
-	resp, err := br.client.Post(baseUrl+"/api/task/next", "application/json; charset=UTF-8", bytes.NewReader(buf))
+	resp, err := br.client.Post(nextTaskUrl, "application/json; charset=UTF-8", bytes.NewReader(buf))
 	if err != nil {
 		return nil, false, err
 	}
@@ -198,7 +200,7 @@ func (br *BenchClient) getNextTask() (*common.TaskResponse, bool, error) {
 	return nil, false, errors.New(string(buf))
 }
 
-// submitResult sends benchmark result to goben.ch server
+// submitResult sends task result to goben.ch server
 func (br *BenchClient) submitResult(result *common.TaskResult) error {
 
 	buf, err := json.Marshal(result)
@@ -206,7 +208,7 @@ func (br *BenchClient) submitResult(result *common.TaskResult) error {
 		return err
 	}
 
-	resp, err := br.client.Post(baseUrl+"/api/task/submit", "application/json; charset=UTF-8", bytes.NewReader(buf))
+	resp, err := br.client.Post(submitResultUrl, "application/json; charset=UTF-8", bytes.NewReader(buf))
 	if err != nil {
 		return err
 	}
@@ -214,19 +216,6 @@ func (br *BenchClient) submitResult(result *common.TaskResult) error {
 
 	// process sucessful response
 	if resp.StatusCode == http.StatusOK {
-		dec := json.NewDecoder(resp.Body)
-
-		var taskResp common.TaskResponse
-
-		if err = dec.Decode(&taskResp); err != nil {
-			return err
-		}
-
-		return nil
-	}
-
-	// there is no package to process
-	if resp.StatusCode == http.StatusNoContent {
 		io.Copy(ioutil.Discard, resp.Body)
 		return nil
 	}
