@@ -32,21 +32,21 @@ func TestBenchmarkResult_DummyItems(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Log(back.Model.TestEnvironment.Items())
-
-	_, err = back.Model.Package.All()
-	if err != nil {
-		t.Fatal(err)
-	}
-
+	t.Log(back.Model.TestEnvironment.Exist("1"))
 	/*
-		err = back.Model.Package.Add(&model.PackageRow{
-			Name:          "github.com/bradfitz/slice",
-			Url:           "https://github.com/bradfitz/slice",
-			RepositoryUrl: "https://github.com",
-			Engine:        "git",
-			Created:       time.Now(),
-			Updated:       time.Now()})
+		_, err = back.Model.Package.All()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		/*
+			err = back.Model.Package.Add(&model.PackageRow{
+				Name:          "github.com/bradfitz/slice",
+				Url:           "https://github.com/bradfitz/slice",
+				RepositoryUrl: "https://github.com",
+				Engine:        "git",
+				Created:       time.Now(),
+				Updated:       time.Now()})
 
 	*/
 	pkg, err := back.Model.Package.GetItem("github.com/bradfitz/slice")
@@ -63,7 +63,7 @@ func TestBenchmarkResult_DummyItems(t *testing.T) {
 	ttask, err := back.Model.Task.Get(string(task.Id))
 	t.Log(err, ttask)
 
-	res, err := back.Model.Task.DeleteExperiment(string(task.Id))
+	res, err := back.Model.Task.GetAndDelete(string(task.Id))
 	t.Log(err, res)
 
 	//result, _ := back.Model.BenchmarkResult.DummyItems("")

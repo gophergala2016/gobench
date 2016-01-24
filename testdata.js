@@ -3,9 +3,9 @@ db.testEnv.insert({"authKey": "change-secret-1", "name": "bare metal (desktop)",
 db.testEnv.insert({"authKey": "change-secret-2", "name": "digitalocean, 10$, Frankfurt", "specification" : "Ubuntu 14.04, x64"});
 
 db.task.remove({});
-db.task.insert({"authKey": "change-secret-1", "packageName": "github.com/regorov/logwriter",    "created" : new Date()});
-db.task.insert({"authKey": "change-secret-1", "packageName": "github.com/valyala/fasttemplate", "created" : new Date()});
 db.task.insert({"authKey": "change-secret-1", "packageName": "github.com/bradfitz/slice", "created" : new Date()});
+db.task.insert({"authKey": "change-secret-1", "packageName": "github.com/valyala/fasttemplate", "created" : new Date()});
+db.task.insert({"authKey": "change-secret-1", "packageName": "github.com/regorov/logwriter",    "created" : new Date()});
 
 
 db.package.remove({});

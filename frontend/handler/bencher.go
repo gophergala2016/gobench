@@ -42,7 +42,7 @@ func (h *handler) ApiNextTaskHandler(c *echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
-	task := common.TaskResponse{Id: taskRow.Id.String(), PackageName: taskRow.PackageName, Type: []string{"benchmark"}}
+	task := common.TaskResponse{Id: string(taskRow.Id), PackageName: taskRow.PackageName, Type: []string{"benchmark"}}
 
 	return c.JSON(http.StatusOK, task)
 }

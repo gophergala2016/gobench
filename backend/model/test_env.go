@@ -33,6 +33,7 @@ type TestEnvironment struct {
 	db   *mgo.Database
 	coll *mgo.Collection
 }
+
 // NewTestEnvironment create and return new environment
 func NewTestEnvironment(db *mgo.Database) (*TestEnvironment, error) {
 	ws := &TestEnvironment{db: db, coll: db.C("testEnv")}
