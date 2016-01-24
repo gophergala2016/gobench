@@ -1,5 +1,4 @@
 # goben.ch
-====
 The Golang community's repositories benchmarking
 
 
