@@ -128,7 +128,7 @@ func (br *BenchClient) execTask() {
 	}
 
 	br.log.Println("Next task to fullfil: Benchmark ", task.PackageName)
-	result := common.TaskResult{Id: task.Id, Round: make(map[string]parse.Set)}
+	result := common.TaskResult{TaskRequest: common.TaskRequest{AuthKey: "", Email: ""}, Id: task.Id, Round: make(map[string]parse.Set)}
 
 	// download target package
 	fPath, err := downloadPackage(task.PackageName)

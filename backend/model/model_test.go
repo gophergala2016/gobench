@@ -1,6 +1,7 @@
 package model_test
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"github.com/gophergala2016/gobench/backend"
 	"github.com/gophergala2016/gobench/backend/model"
@@ -59,12 +60,14 @@ func TestBenchmarkResult_DummyItems(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log("Next: ", task)
-	ttask, err := back.Model.Task.Get(string(task.Id))
+	s := task.Id.Hex()
+	t.Log("Next: ", s)
+	id, _ := hex.DecodeString(s)
+	ttask, err := back.Model.Task.Get(string(id))
 	t.Log(err, ttask)
 
-	res, err := back.Model.Task.GetAndDelete(string(task.Id))
-	t.Log(err, res)
+	//res, err := back.Model.Task.GetAndDelete(string(task.Id))
+	//t.Log(err, res)
 
 	//result, _ := back.Model.BenchmarkResult.DummyItems("")
 }

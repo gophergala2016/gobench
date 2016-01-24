@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/gophergala2016/gobench/backend/model"
@@ -28,7 +29,6 @@ func (h *handler) ApiNextTaskHandler(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	//
 	if !ok {
 		return echo.NewHTTPError(http.StatusBadRequest, "Wrong authKey!")
 	}
@@ -42,7 +42,7 @@ func (h *handler) ApiNextTaskHandler(c *echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
-	task := common.TaskResponse{Id: string(taskRow.Id), PackageName: taskRow.PackageName, Type: []string{"benchmark"}}
+	task := common.TaskResponse{Id: taskRow.Id.Hex(), PackageName: taskRow.PackageName, Type: []string{"benchmark"}}
 
 	return c.JSON(http.StatusOK, task)
 }
@@ -72,8 +72,13 @@ func (h *handler) ApiSubmitTaskResult(c *echo.Context) error {
 
 	fmt.Println("Auth key ok")
 
+	id, err := hex.DecodeString(tr.Id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Wrong Task.Id value!")
+	}
+
 	// if rows exist return row + delete
-	taskRow, err := h.back.Model.Task.GetAndDelete(tr.Id)
+	taskRow, err := h.back.Model.Task.GetAndDelete(string(id))
 	if err != nil {
 		if err == model.ErrNotFound {
 			return echo.NewHTTPError(http.StatusBadRequest, "Wrong Task Id!")
