@@ -35,6 +35,21 @@ type Task struct {
 // NewTask creates Task model, mongo's collection "task"
 func NewTask(db *mgo.Database) (*Task, error) {
 	t := &Task{db: db, coll: db.C("task")}
+
+	go func() {
+		var tr TaskRow
+		for {
+			time.Sleep(3 * time.Minute)
+			for ; ; t.coll.Find(bson.M{"exists": "assigned"}).Iter().Next(&tr) {
+				if time.Now().Sub(tr.Assigned) > 10*time.Time {
+
+				}
+
+			}
+
+		}
+
+	}()
 	return t, nil
 }
 
@@ -85,18 +100,11 @@ func (t *Task) Exist(id string) (bool, error) {
 	return err == nil, err
 }
 
-// Delete removes task from the list
-func (t *Task) Delete(id string) error {
-	err := t.coll.RemoveId(bson.ObjectIdHex(id))
-	return err
-}
-
-// Next returns next task for test environment identified by authKey, it
-// returns first row from "task" collection and marks it as taken
-func (t *Task) NextExperiment(authKey string) (*TaskRow, error) {
+// GetAndDelete returns task and deletes it if found. If not found returns nil, model.ErrNotFound
+func (t *Task) GetAndDelete(id string) (*TaskRow, error) {
 
 	var tr TaskRow
-	_, err := t.coll.Find(bson.M{"authKey": authKey, "assigned": nil}).Limit(1).Apply(mgo.Change{Update: bson.M{"$set": bson.M{"assigned": time.Now()}}}, &tr)
+	_, err := t.coll.FindId(bson.ObjectId(id)).Apply(mgo.Change{Remove: true, ReturnNew: false}, &tr)
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, ErrNotFound
@@ -104,10 +112,6 @@ func (t *Task) NextExperiment(authKey string) (*TaskRow, error) {
 			return nil, err
 		}
 	}
-
-	// TODO: medium priority, mark the task as taken and release in N minutes
-	// if row still exists
-	// Impelemt in Model.Job()
 
 	return &tr, nil
 }

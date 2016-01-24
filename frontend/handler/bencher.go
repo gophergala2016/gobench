@@ -68,8 +68,8 @@ func (h *handler) ApiSubmitTaskResult(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Wrong authKey!")
 	}
 
-	// retrives single task to update
-	taskRow, err := h.back.Model.Task.Get(tr.Id)
+	// if rows exist return row + delete
+	taskRow, err := h.back.Model.Task.GetAndDelete(tr.Id)
 	if err != nil {
 		if err == model.ErrNotFound {
 			return echo.NewHTTPError(http.StatusBadRequest, "Wrong Task Id!")
@@ -82,9 +82,6 @@ func (h *handler) ApiSubmitTaskResult(c *echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-
-	// TODO:
-	// если сохранение прошло нормально, удалить запись из task
 
 	return echo.NewHTTPError(http.StatusOK)
 }

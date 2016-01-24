@@ -55,14 +55,16 @@ func TestBenchmarkResult_DummyItems(t *testing.T) {
 	}
 	t.Log(pkg, err)
 
-	task, err := back.Model.Task.NextExperiment("change-secret-1")
+	task, err := back.Model.Task.Next("change-secret-1")
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log("Next: ", task)
-
 	ttask, err := back.Model.Task.Get(string(task.Id))
 	t.Log(err, ttask)
+
+	res, err := back.Model.Task.DeleteExperiment(string(task.Id))
+	t.Log(err, res)
 
 	//result, _ := back.Model.BenchmarkResult.DummyItems("")
 }

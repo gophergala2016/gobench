@@ -65,7 +65,7 @@ func (m *Model) RegisterTasks(pkgName string) error {
 	}
 
 	for i := range te {
-		err := m.Task.Register(pkgName, te[i].AuthKey, []string{"becnmark"})
+		err := m.Task.Register(pkgName, te[i].AuthKey, []string{"benchmark"})
 		if err != nil {
 			m.logger.Printf("Could not register new task for package %s. Details: %s", pkgName, err)
 		}
