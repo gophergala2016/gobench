@@ -4,6 +4,7 @@ import (
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 	"time"
+	"math/rand"
 )
 
 type RepositoryEngine string
@@ -11,38 +12,48 @@ type RepositoryEngine string
 const (
 	Git RepositoryEngine = "git"
 
-	// TODO: Implement support after GopherGala
+// TODO: Implement support after GopherGala
 	Bazaar    RepositoryEngine = "bazaar"
 	Mercurial RepositoryEngine = "mercurial"
 )
 
 // PackageRow holds package attributes
 type PackageRow struct {
-	Id bson.ObjectId `bson:"_id,omitempty"`
+	Id            bson.ObjectId `bson:"_id,omitempty"`
 
 	// Name of package in a gopher way (labix.org/v2/mgo)
-	Name string `bson:"name"`
+	Name          string `bson:"name"`
 
 	// Url holds full package url
-	Url string `bson: "url"`
+	Url           string `bson: "url"`
 
 	// Description of the package
-	Description string `bson:"description"`
+	Description   string `bson:"description"`
+
+	// All tags of This repository
+	Tags []RepositoryTag `bson:"tags"`
 
 	// Repository holds repository url (https://github.com or https://labix.org, etc)
 	RepositoryUrl string `bson:"repositoryUrl"`
 
 	// Repository's engine
-	Engine RepositoryEngine `bson:"engine"`
+	Engine        RepositoryEngine `bson:"engine"`
 
 	// Created holds time
-	Created time.Time
+	Created       time.Time
 
 	// Created holds time of the last update
-	Updated time.Time
+	Updated       time.Time
 
 	// LastCommitUid holds hash of the the last commit
-	LastCommitId string
+	LastCommitId  string
+}
+
+type RepositoryTag struct {
+	Name string `bson: "name"`
+	Zip string `bson: "zip"`
+	Tar string `bson: "tar"`
+	Commit string `bson: "commit"`
 }
 
 // Package provides single point of access to all packages
@@ -67,7 +78,7 @@ func NewPackage(db *mgo.Database) (*Package, error) {
 	return p, p.coll.EnsureIndex(mgo.Index{Key: []string{"name"}, Unique: true, DropDups: true})
 }
 
-// Add inserts new package and ignores if package exist aready
+// Add inserts new package and ignores if package exist already
 func (p *Package) Add(pr *PackageRow) error {
 	pr.Created = time.Now()
 
@@ -78,7 +89,15 @@ func (p *Package) Add(pr *PackageRow) error {
 	return nil
 }
 
-func (p *Package) GetItem(name string) ([]PackageRow, error) {
+func (p *Package) GetItem(name string) (PackageRow, error) {
+	item := PackageRow{}
+	if err := p.coll.Find(bson.M{"url": bson.RegEx{name, ""}}).One(&item); err != nil {
+		return item, err
+	}
+	return item, nil
+}
+
+func (p *Package) GetItems(name string) ([]PackageRow, error) {
 	item := make([]PackageRow, 0)
 	if err := p.coll.Find(bson.M{"name": bson.RegEx{name, ""}}).All(&item); err != nil {
 		return nil, err
@@ -106,11 +125,7 @@ func (p *Package) Favorites(userName string) ([]PackageRow, error) {
 }
 
 // Items returns all repositories
-func (p *Package) GetItemsByIdSlice(ids []string) ([]PackageRow, error) {
-	oids := make([]bson.ObjectId, len(ids))
-	for i := range ids {
-		oids[i] = bson.ObjectIdHex(ids[i])
-	}
+func (p *Package) GetItemsByIdSlice(oids []bson.ObjectId) ([]PackageRow, error) {
 	items := make([]PackageRow, 0)
 	if err := p.coll.Find(bson.M{"_id": bson.M{"$in": oids}}).All(&items); err != nil && err != nil {
 		return nil, err
@@ -118,6 +133,16 @@ func (p *Package) GetItemsByIdSlice(ids []string) ([]PackageRow, error) {
 	return items, nil
 }
 
-func (p *Package) Items(ids []string) ([]PackageRow, error) {
-	return p.GetItemsByIdSlice(ids)
+func (p *Package) Items(oids []bson.ObjectId) ([]PackageRow, error) {
+	return p.GetItemsByIdSlice(oids)
+}
+
+
+func (p *Package) DummyList() ([]PackageRow, error) {
+	rInt := rand.Intn(10)
+	items := make([]PackageRow, 0)
+	if err := p.coll.Find(bson.M{}).Skip(rInt).Limit(10).All(&items); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

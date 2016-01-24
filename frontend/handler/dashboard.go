@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"labix.org/v2/mgo/bson"
 )
 
 type TokenSource struct {
@@ -40,7 +41,7 @@ func (h *handler) DashboardGetHandler(c *echo.Context) error {
 		s.Delete("just_signup")
 		s.Save()
 	}
-	packages, err := h.back.Model.Package.GetItemsByIdSlice(user.Repos)
+	packages, err := h.back.Model.Package.GetItemsByIdSlice(user.Packages)
 	if err != nil {
 		log.Println(err)
 	}
@@ -53,6 +54,67 @@ func (h *handler) DashboardGetHandler(c *echo.Context) error {
 	return c.Render(http.StatusOK, "dashboard.html", data)
 
 }
+
+
+func (h *handler) RemoveFromFavPostHandler(c *echo.Context) error {
+
+	s := session.Default(c)
+	if s.Get("user") == "" {
+		return c.JSON(http.StatusForbidden, "Access denied")
+	}
+	user, err := h.back.Model.User.GetByLogin(s.Get("user").(string))
+	if (err != nil || user == &model.UserRow{}) {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+	p, err := h.back.Model.Package.GetItem(c.Form("package"))
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	var packages []bson.ObjectId
+	for _, up := range user.Packages {
+		if up != p.Id {
+			packages = append(packages, up)
+		}
+	}
+	user.Packages = packages
+	_, err = h.back.Model.User.UpsertUser(user)
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, nil)
+}
+
+
+func (h *handler) AddToFavPostHandler(c *echo.Context) error {
+	s := session.Default(c)
+	if s.Get("user") == "" {
+		return c.JSON(http.StatusForbidden, "Access denied")
+	}
+	user, err := h.back.Model.User.GetByLogin(s.Get("user").(string))
+	if (err != nil || user == &model.UserRow{}) {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	p, err := h.back.Model.Package.GetItem(c.Form("package"))
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	user.Packages = append(user.Packages, p.Id)
+	_, err = h.back.Model.User.UpsertUser(user)
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, nil)
+}
+
 
 func addUserRepos(h *handler, u *model.UserRow) error {
 
@@ -77,8 +139,10 @@ func addUserRepos(h *handler, u *model.UserRow) error {
 				//Name:   *repo.Name,
 				Name:          strings.Replace(*repo.HTMLURL, "https://github.com/", "", -1),
 				Url:           *repo.HTMLURL,
+				Description:   *repo.Description,
 				RepositoryUrl: "https://github.com",
 				Engine:        model.Git,
+				Tags:          getRepoTags(*user.Login, *repo.Name, client),
 			}
 			err = h.back.Model.Package.Add(pr)
 			if err != nil {
@@ -88,4 +152,13 @@ func addUserRepos(h *handler, u *model.UserRow) error {
 	}
 
 	return nil
+}
+
+func getRepoTags(user string, repoName string, client *github.Client) []model.RepositoryTag {
+	tags := make([]model.RepositoryTag,0,1)
+	githubTags,_,_ := client.Repositories.ListTags(user,repoName,nil)
+	for _,v := range githubTags {
+		tags = append(tags, model.RepositoryTag{Name: *v.Name, Zip: *v.ZipballURL, Tar: *v.TarballURL, Commit: *v.Commit.URL})
+	}
+	return tags
 }
