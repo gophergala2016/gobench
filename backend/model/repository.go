@@ -1,19 +1,10 @@
 package model
 
+/*
 import (
 	"fmt"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
-)
-
-type RepositoryEngine string
-
-const (
-	Git RepositoryEngine = "git"
-
-	// TODO: Implement support after GopherGala
-	Bazaar    RepositoryEngine = "bazaar"
-	Mercurial RepositoryEngine = "mercurial"
 )
 
 // Repository holds repository attributes
@@ -53,6 +44,7 @@ func (r *Repository) Add(repo RepositoryRow) error {
 	return nil
 }
 
+
 // Items returns all repositories
 func (r *Repository) Items(ids []string) ([]RepositoryRow, error) {
 	oids := make([]bson.ObjectId, len(ids))
@@ -66,3 +58,4 @@ func (r *Repository) Items(ids []string) ([]RepositoryRow, error) {
 	}
 	return items, nil
 }
+*/
