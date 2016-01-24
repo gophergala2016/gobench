@@ -6,10 +6,11 @@ import (
 	"github.com/labstack/gommon/log"
 	"net/http"
 	"github.com/gophergala2016/gobench/backend/model"
+	"strings"
 )
 
 func (h *handler) SearchbackHandler(c *echo.Context) error {
-	searchq := c.Query("search")
+	searchq := strings.ToLower(c.Query("search"))
 	packages, err := h.back.Model.Package.GetItems(searchq)
 	if err != nil {
 		log.Error(err)

@@ -73,7 +73,8 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 	f.router.Get("/dashboard", h.DashboardGetHandler)
 	f.router.Post("/fav/add", h.AddToFavPostHandler)
 	f.router.Post("/fav/remove", h.RemoveFromFavPostHandler)
-	f.router.Get("/:package", h.PackageGetHandler)
+//	f.router.Get("/:package", h.PackageGetHandler)
+	f.router.Get("/p/*", h.PackageGetHandler)
 
 	return f, nil
 }
@@ -119,7 +120,6 @@ func (f *Frontend) Start() error {
 // Render implements Echo's Renderer interface
 func (f *Frontend) Render(w io.Writer, name string, data interface{}) error {
 	funcMap := template.FuncMap{
-		"packageUrl": func(s string) string { return strings.Replace(s, "/", "_", -1) },
 		"githubUrl": func(s string) string {
 			r := strings.NewReplacer("https://", "", "http://", "")
 			return r.Replace(s)

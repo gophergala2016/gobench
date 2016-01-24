@@ -9,7 +9,8 @@ import (
 )
 
 func (h *handler) PackageGetHandler(c *echo.Context) error {
-	pName := strings.Replace(c.Param("package"), "_", "/", -1)
+
+	pName := strings.Replace(c.Request().RequestURI, "/p/", "", -1)
 	p, err := h.back.Model.Package.GetItem(pName)
 	if err != nil {
 		log.Println(err)
