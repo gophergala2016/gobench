@@ -25,10 +25,10 @@ type PackageRow struct {
 	Name string `bson:"name"`
 
 	// Url holds full package url
-	Url string `bson: "url"`
+	Url string `bson:"url"`
 
 	// Package author
-	Author string `bson: "author"`
+	Author string `bson:"author"`
 
 	// Description of the package
 	Description string `bson:"description"`
@@ -53,10 +53,10 @@ type PackageRow struct {
 }
 
 type RepositoryTag struct {
-	Name   string `bson: "name"`
-	Zip    string `bson: "zip"`
-	Tar    string `bson: "tar"`
-	Commit string `bson: "commit"`
+	Name   string `bson:"name"`
+	Zip    string `bson:"zip"`
+	Tar    string `bson:"tar"`
+	Commit string `bson:"commit"`
 }
 
 // Package provides single point of access to all packages
@@ -96,7 +96,7 @@ func (p *Package) Add(pr *PackageRow) (*PackageRow, error) {
 func (p *Package) GetItem(name string) (PackageRow, error) {
 	item := PackageRow{}
 
-	err := p.coll.Find(bson.M{"name": bson.RegEx{name, ""}}).One(&item)
+	err := p.coll.Find(bson.M{"name": bson.RegEx{Pattern: name, Options: ""}}).One(&item)
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			return item, ErrNotFound
@@ -108,7 +108,7 @@ func (p *Package) GetItem(name string) (PackageRow, error) {
 
 func (p *Package) GetItems(name string) ([]PackageRow, error) {
 	item := make([]PackageRow, 0)
-	if err := p.coll.Find(bson.M{"name": bson.RegEx{name, ""}}).All(&item); err != nil {
+	if err := p.coll.Find(bson.M{"name": bson.RegEx{Pattern: name, Options: ""}}).All(&item); err != nil {
 		return nil, err
 	}
 	return item, nil
@@ -136,7 +136,7 @@ func (p *Package) Favorites(userName string) ([]PackageRow, error) {
 // Items returns all repositories
 func (p *Package) GetItemsByIdSlice(oids []bson.ObjectId) ([]PackageRow, error) {
 	items := make([]PackageRow, 0)
-	if err := p.coll.Find(bson.M{"_id": bson.M{"$in": oids}}).All(&items); err != nil && err != nil {
+	if err := p.coll.Find(bson.M{"_id": bson.M{"$in": oids}}).All(&items); err != nil && err != mgo.ErrNotFound {
 		return nil, err
 	}
 	return items, nil

@@ -38,12 +38,12 @@ func NewTask(db *mgo.Database) (*Task, error) {
 	return t, nil
 }
 
-// Next returns next task for test environment identified by authKey
+// Next returns next task for test environment identified by authKey, it
+// returns first row from "task" collection and marks it as taken
 func (t *Task) Next(authKey string) (*TaskRow, error) {
 
-	// TODO: low priority, add sorting by Created
 	var tr TaskRow
-	err := t.coll.Find(bson.M{"authKey": authKey}).One(&tr)
+	_, err := t.coll.Find(bson.M{"authKey": authKey, "assigned": nil}).Limit(1).Apply(mgo.Change{Update: bson.M{"$set": bson.M{"assigned": time.Now()}}}, &tr)
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, ErrNotFound
@@ -54,6 +54,7 @@ func (t *Task) Next(authKey string) (*TaskRow, error) {
 
 	// TODO: medium priority, mark the task as taken and release in N minutes
 	// if row still exists
+	// Impelemt in Model.Job()
 
 	return &tr, nil
 }
@@ -88,4 +89,25 @@ func (t *Task) Exist(id string) (bool, error) {
 func (t *Task) Delete(id string) error {
 	err := t.coll.RemoveId(bson.ObjectIdHex(id))
 	return err
+}
+
+// Next returns next task for test environment identified by authKey, it
+// returns first row from "task" collection and marks it as taken
+func (t *Task) NextExperiment(authKey string) (*TaskRow, error) {
+
+	var tr TaskRow
+	_, err := t.coll.Find(bson.M{"authKey": authKey, "assigned": nil}).Limit(1).Apply(mgo.Change{Update: bson.M{"$set": bson.M{"assigned": time.Now()}}}, &tr)
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			return nil, ErrNotFound
+		} else {
+			return nil, err
+		}
+	}
+
+	// TODO: medium priority, mark the task as taken and release in N minutes
+	// if row still exists
+	// Impelemt in Model.Job()
+
+	return &tr, nil
 }
