@@ -10,8 +10,8 @@ The Golang community's repositories benchmarking and tracking service
 - User notifications
 
 ## Inspiration
-- Ruby world: https://rubygems.org/gems
-- Rust: https://crates.io/
+- Ruby world: https://rubygems.org
+- Rust: https://crates.io
 - Go world: https://godoc.org
 
 ## How to use?
