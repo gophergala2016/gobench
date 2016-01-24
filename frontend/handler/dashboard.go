@@ -135,7 +135,7 @@ func addUserRepos(h *handler, u *model.UserRow) ([]*model.PackageRow, error) {
 		return nil, err
 	}
 
-	repoList, _, err := client.Repositories.List(*user.Login, &github.RepositoryListOptions{Type: "owner"})
+	repoList, _, err := client.Repositories.List(*user.Login, &github.RepositoryListOptions{Type: "all"})
 	if err != nil {
 		return nil, err
 	}
