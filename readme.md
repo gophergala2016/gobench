@@ -43,14 +43,18 @@ Planned prototype scope:
 - Vendoring
 	- [X] Standard
 - Package benchmarking
-	- [X] go test -bench -bechmem
+	- [X] running go test -bench -bechmem
+	- [X] saving results in database
+	- [ ] go test -bench with with different GOMAXPROCS
 - Package dashboard
 	- [X] General information
+	- [ ] Show chart of Benchmark**** functions and progress
 - Platforms
 	- [X] Bare metal, Ubuntu
+	- [ ] DigitalOcean
 
 ### What next?
-We will continue, definitely! Follow us https://twitter.com/goben_ch
+Will we continue? Yes, definitely! Follow us https://twitter.com/goben_ch
 After GopherGala, development will continue here https://github.com/goben-ch/gobench
 
 ## TODO List

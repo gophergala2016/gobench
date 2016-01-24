@@ -2,17 +2,18 @@ package handler
 
 import (
 	"github.com/gophergala2016/gobench/backend"
+	"github.com/gophergala2016/gobench/backend/model"
 	"github.com/labstack/echo"
 	"github.com/syntaqx/echo-middleware/session"
 	"net/http"
-	"github.com/gophergala2016/gobench/backend/model"
 )
 
 // GithubConfig holds GitHub app credentials
 type githubConfig struct {
-	ClientId    string `json:"clientId"`
+	ClientId     string `json:"clientId"`
 	ClientSecret string `json:"clientSecret"`
 }
+
 //HandlerConfig for Github
 type HandlerConfig struct {
 	Github githubConfig `json:"github"`
@@ -46,10 +47,10 @@ func (h *handler) IndexGetHandler(c *echo.Context) error {
 	p, _ := h.back.Model.Package.DummyList()
 	u, _ := h.back.Model.Package.DummyList()
 	data := struct {
-		New []model.PackageRow
+		New     []model.PackageRow
 		Popular []model.PackageRow
 		Updated []model.PackageRow
-	} {
+	}{
 		n,
 		p,
 		u,

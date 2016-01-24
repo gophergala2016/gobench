@@ -7,11 +7,12 @@ import (
 	"log"
 	"os"
 )
+
 //Config configs for backend
 type Config struct {
-	AuthKey 	string `json: "authKey"`
-	Email   	string `json: "email"`
-	BaseUrl		string `json: "baseurl"`
+	AuthKey string `json: "authKey"`
+	Email   string `json: "email"`
+	BaseUrl string `json: "baseurl"`
 }
 
 func main() {

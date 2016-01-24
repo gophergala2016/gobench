@@ -6,6 +6,7 @@ import (
 	"github.com/gophergala2016/gobench/frontend"
 	"io/ioutil"
 )
+
 // Config stores app configs
 type Config struct {
 	Backend  backend.Config  `json:"backend"`

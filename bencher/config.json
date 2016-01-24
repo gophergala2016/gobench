@@ -1,5 +1,5 @@
 {
-	"authKey"  : "test-ubuntu-server-14.4x64",
-	"email" : "robert.egorov@gmail.com"
-        "baseurl"  : "http://goben.ch:80"
+	"authKey"  : "change-secret-1",
+	"email"    : "robert.egorov@gmail.com",
+    "baseurl"  : "http://goben.ch:80"
 }

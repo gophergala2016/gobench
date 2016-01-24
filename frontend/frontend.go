@@ -73,7 +73,7 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 	f.router.Get("/dashboard", h.DashboardGetHandler)
 	f.router.Post("/fav/add", h.AddToFavPostHandler)
 	f.router.Post("/fav/remove", h.RemoveFromFavPostHandler)
-//	f.router.Get("/:package", h.PackageGetHandler)
+	//	f.router.Get("/:package", h.PackageGetHandler)
 	f.router.Get("/p/*", h.PackageGetHandler)
 
 	return f, nil
