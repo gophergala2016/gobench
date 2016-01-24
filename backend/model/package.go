@@ -91,7 +91,7 @@ func (p *Package) Add(pr *PackageRow) error {
 
 func (p *Package) GetItem(name string) (PackageRow, error) {
 	item := PackageRow{}
-	if err := p.coll.Find(bson.M{"url": bson.RegEx{name, ""}}).One(&item); err != nil {
+	if err := p.coll.Find(bson.M{"name": bson.RegEx{name, ""}}).One(&item); err != nil {
 		return item, err
 	}
 	return item, nil

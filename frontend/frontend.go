@@ -17,9 +17,9 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"strings"
 	"sync"
 	"syscall"
-	"strings"
 )
 
 // Config holds frontend configuration params
@@ -119,8 +119,12 @@ func (f *Frontend) Start() error {
 // Render implements Echo's Renderer interface
 func (f *Frontend) Render(w io.Writer, name string, data interface{}) error {
 	funcMap := template.FuncMap{
-        "packageUrl": func(s string) string {return strings.Replace(s, "/", "_", -1)},
-    }
+		"packageUrl": func(s string) string { return strings.Replace(s, "/", "_", -1) },
+		"githubUrl": func(s string) string {
+			r := strings.NewReplacer("https://", "", "http://", "")
+			return r.Replace(s)
+		},
+	}
 
 	// TODO: implement templates caching
 	tmpl, err := template.New(name).Funcs(funcMap).ParseFiles(path.Join(f.cfg.TemplateFolder, "layout.html"), path.Join(f.cfg.TemplateFolder, name))

@@ -5,9 +5,9 @@
         <div class="col-xs-12">
             {{range .Packages}}
             <div class="box box-solid">
-                <a href="/{{.Url | packageUrl}}">
+                <a href="/{{.Name | packageUrl}}">
                     <div class="box-header with-border">
-                        <h3 class="box-title">{{.Url}}</h3>
+                        <h3 class="box-title">{{.Name}}</h3>
 
                         <div class="box-tools pull-right">
                             <a class="btn btn-box-tool fav" data-widget="collapse"><i
