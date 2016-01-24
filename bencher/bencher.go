@@ -137,11 +137,11 @@ func (br *BenchClient) execTask() {
 		return
 	}
 
-	br.log.Println("Next task to fullfil: Benchmark ", task.PackageUrl)
+	br.log.Println("Next task to fullfil: Benchmark ", task.PackageName)
 	result := common.TaskResult{Id: task.Id, Round: make(map[string]parse.Set)}
 
 	// download target package
-	fPath, err := downloadPackage(task.PackageUrl)
+	fPath, err := downloadPackage(task.PackageName)
 	if err != nil {
 		br.log.Printf("Package download failed. Details: %s", err)
 		return
@@ -163,10 +163,10 @@ func (br *BenchClient) execTask() {
 	    idx := "cpu" + strconv.Itoa(i)
 
 	    // 3. Вызываем тест и парсим ответ
-	    result.Round[idx], err = runTest( task.PackageUrl, i )
+	    result.Round[idx], err = runTest( task.PackageName, i )
 	    
 	    if err != nil {
-		log.Printf ("Failed to run test for ", task.PackageUrl, " on " , i , " CPU(s): ", err )
+		log.Printf ("Failed to run test for ", task.PackageName, " on " , i , " CPU(s): ", err )
 		continue
 	    }
 	    
@@ -217,9 +217,9 @@ func (br *BenchClient) getNextTask() (*common.TaskResponse, bool, error) {
 			return nil, false, err
 		}
 
-    		log.Println( "getNextTask done. Task:", task.PackageUrl )
+    		log.Println( "getNextTask done. Task:", task.PackageName )
 
-		return &task, len(task.PackageUrl) > 0, nil
+		return &task, len(task.PackageName) > 0, nil
 	}
 
 	// there is no package to process

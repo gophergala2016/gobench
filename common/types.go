@@ -10,12 +10,12 @@ type TaskRequest struct {
 }
 
 type TaskResponse struct {
-	Id         string `json:"id"`
-	PackageUrl string `json:"packageUrl"`
+    Id string `json:"id"`
+    PackageName string `json:"packageName"`
 
-	// Type specifies task type.
-	// TODO: support different task types: Benchmark, Build, Vet, etc.
-	Type string `json:"type"`
+    // Type specifies task type.
+    // TODO: support different task types: Benchmark, Build, Vet, etc.
+    Type []string `json:"type"`
 }
 
 type TaskResult struct {
