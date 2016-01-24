@@ -27,6 +27,9 @@ type PackageRow struct {
 	// Url holds full package url
 	Url           string `bson: "url"`
 
+	// Package author
+	Author        string `bson: "author"`
+
 	// Description of the package
 	Description   string `bson:"description"`
 
