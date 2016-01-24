@@ -128,11 +128,11 @@ func (br *BenchClient) execTask() {
 		return
 	}
 
-	br.log.Println("Next task to fullfil: Benchmark ", task.PackageUrl)
+	br.log.Println("Next task to fullfil: Benchmark ", task.PackageName)
 	result := common.TaskResult{Id: task.Id, Round: make(map[string]parse.Set)}
 
 	// download target package
-	fPath, err := downloadPackage(task.PackageUrl)
+	fPath, err := downloadPackage(task.PackageName)
 	if err != nil {
 		br.log.Printf("Package download failed. Details: %s", err)
 		return
@@ -198,7 +198,7 @@ func (br *BenchClient) getNextTask() (*common.TaskResponse, bool, error) {
 			return nil, false, err
 		}
 
-		return &task, len(task.PackageUrl) > 0, nil
+		return &task, len(task.PackageName) > 0, nil
 	}
 
 	// there is no package to process

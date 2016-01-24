@@ -55,3 +55,21 @@ func New(db *mgo.Database, l *log.Logger) (*Model, error) {
 
 	return m, nil
 }
+
+// PackageName registers individual task for each test environment
+func (m *Model) RegisterTasks(pkgName string) error {
+
+	te, err := m.TestEnvironment.Items()
+	if err != nil {
+		return err
+	}
+
+	for i := range te {
+		err := m.Task.Register(pkgName, te[i].AuthKey, []string{"becnmark"})
+		if err != nil {
+			m.logger.Printf("Could not register new task for package %s. Details: %s", pkgName, err)
+		}
+	}
+
+	return nil
+}

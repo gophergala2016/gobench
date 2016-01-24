@@ -12,11 +12,16 @@ type BenchmarkResultRow struct {
 	Id bson.ObjectId `bson:"_id,omitempty"`
 
 	// PackageUrl holds full URL to package (github.com/gorilla/session)
-	PackageUrl string `bson:"packageUrl"`
+	PackageName string `bson:"packageName"`
 
+	// Created holds row saving data. Used for chart sorting
 	Created time.Time `bson:"created"`
 
+	// Value holds benchmark values
 	Value map[string]parse.Set `bson:"value"`
+
+	// TestEnvSpecification holds description of HW/OS where task executed
+	TestEnvSpecification string `bson:"testEnv"`
 }
 
 // BenchmarkResult provides single point of access to all bench BenchmarkResults to execute
@@ -31,17 +36,26 @@ func NewBenchmarkResult(db *mgo.Database) (*BenchmarkResult, error) {
 	return t, nil
 }
 
-// Items returns bechmark results by package's url
-func (p *BenchmarkResult) Items(url string) ([]BenchmarkResultRow, error) {
-	item := make([]BenchmarkResultRow, 0)
-	if err := p.coll.Find(bson.M{"url": url}).All(&item); err != nil {
+// Add saves bechmark results
+func (br *BenchmarkResult) Add(pkgName, testEnv string, value map[string]parse.Set) error {
+	item := BenchmarkResultRow{Created: time.Now(), PackageName: pkgName, TestEnvSpecification: testEnv, Value: value}
+	if err := br.coll.Insert(item); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Items retrives benchmark results for specific package identified by url
+func (br *BenchmarkResult) Items(pkgName string) ([]BenchmarkResultRow, error) {
+	items := make([]BenchmarkResultRow, 0)
+	if err := br.coll.Find(bson.M{"packageName": pkgName}).Sort("created").All(&items); err != mgo.ErrNotFound {
 		return nil, err
 	}
-	return item, nil
+	return items, nil
 }
 
 // DummyItems returns bechmark results Dummy Items
-func (p *BenchmarkResult) DummyItems(url string) ([]BenchmarkResultRow, error) {
+func (br *BenchmarkResult) DummyItems(url string) ([]BenchmarkResultRow, error) {
 	items := make([]BenchmarkResultRow, 3)
 
 	items[0].Created = time.Now().Add(-1 * time.Hour * 24)
