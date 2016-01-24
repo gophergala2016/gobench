@@ -29,7 +29,7 @@ $(document).ready(function () {/* activate scrollspy menu */
 
     $('.fav').click(function () {
 
-        var icon = $('.fav').find('i');
+        var icon = $(this).find('i');
         var action = icon.hasClass("fa-heart-o") ? "add" : "remove";
         var title = $(this).parent().prev().text().trim();
         $.ajax("/fav/" + action, {
