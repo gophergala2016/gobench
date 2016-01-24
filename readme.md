@@ -1,7 +1,6 @@
 # goben.ch
 The Golang community's repositories benchmarking and tracking service
 
-
 ## Purpose
 - Single point of access to all golang community's packages
 - Automatic package benchmarking including: linter, vet, test, bench, etc
@@ -32,6 +31,28 @@ The Golang community's repositories benchmarking and tracking service
 - http://goben.ch starts keeping eye on this package
 - http://goben.ch re-benchmarks if changes captured
 
+## Gopher Gala 2016
+The Gopher Gala is the world's first Go(lang) distributed hackathon.
+We have enetered the competition with idea of building service prototype.
+Planned prototype scope:
+
+- Repositories supported
+	- [X] https://github.com
+- Packages capture
+	- [X] User's favorites on github
+- Vendoring
+	- [X] Standard
+- Package benchmarking
+	- [X] go test -bench -bechmem
+- Package dashboard
+	- [X] General information
+- Platforms
+	- [X] Bare metal, Ubuntu
+
+### What next?
+We will continue, definitely! Follow us https://twitter.com/goben_ch
+After GopherGala, development will continue here https://github.com/goben-ch/gobench
+
 ## TODO List
 - Repositories supported
 	- [X] https://github.com
@@ -50,9 +71,16 @@ The Golang community's repositories benchmarking and tracking service
 - Package benchmarking
 	- [X] go test -bench
 	- [ ] go test
-	- [ ] vet
+	- [ ] go vet
+	- [ ] go lint
 	- [ ] go fmt
 	- [ ] others
+- Package dashboard
+	- [X] General information
+	- [ ] Benchmarking results
+	- [ ] Comparing performance on platforms
+	- [ ] Subcription
+	- [ ] List of similar packages, managed by community
 - Platforms
 	- [X] Bare metal. Ubuntu 14.04, Intel i5, 4 Core
 	- [ ] DigitalOcean
