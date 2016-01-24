@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"fmt"
 	"labix.org/v2/mgo/bson"
 )
 
@@ -80,7 +79,6 @@ func (h *handler) RemoveFromFavPostHandler(c *echo.Context) error {
 		}
 	}
 	user.Packages = packages
-	fmt.Println(user.Packages, packages)
 	_, err = h.back.Model.User.UpsertUser(user)
 	if err != nil {
 		log.Println(err)
