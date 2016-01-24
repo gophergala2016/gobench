@@ -54,13 +54,13 @@ func (h *handler) OauthCallbackHandler(c *echo.Context) error {
 		Token:     userToken,
 		AvatarURL: *user.AvatarURL,
 	}
-	ci, err := h.back.Model.User.CreateOrUpdateUser(&u)
+	ci, err := h.back.Model.User.CreateOrUpdate(&u)
 	if err != nil {
 		log.Println(err.Error(), "Can't create user")
 		return c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 
-	if (ci.Updated == 0) {
+	if ci.Updated == 0 {
 		s.Set("just_signup", true)
 	}
 	s.Set("user", userLogin)

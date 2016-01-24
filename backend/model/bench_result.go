@@ -24,7 +24,7 @@ type BenchmarkResultRow struct {
 	TestEnvSpecification string `bson:"testEnv"`
 }
 
-// BenchmarkResult provides single point of access to all bench BenchmarkResults to execute
+// BenchmarkResult provides single point of access to all benchmarking results
 type BenchmarkResult struct {
 	db   *mgo.Database
 	coll *mgo.Collection
@@ -48,7 +48,11 @@ func (br *BenchmarkResult) Add(pkgName, testEnv string, value map[string]parse.S
 // Items retrives benchmark results for specific package identified by url
 func (br *BenchmarkResult) Items(pkgName string) ([]BenchmarkResultRow, error) {
 	var items []BenchmarkResultRow
-	if err := br.coll.Find(bson.M{"packageName": pkgName}).Sort("created").All(&items); err != mgo.ErrNotFound {
+
+	if err := br.coll.Find(bson.M{"packageName": pkgName}).Sort("created").All(&items); err != nil {
+		if err == mgo.ErrNotFound {
+			return nil, ErrNotFound
+		}
 		return nil, err
 	}
 	return items, nil

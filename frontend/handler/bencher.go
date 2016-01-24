@@ -38,10 +38,10 @@ func (h *handler) ApiNextTaskHandler(c *echo.Context) error {
 	if err != nil {
 		if err == model.ErrNotFound {
 			return echo.NewHTTPError(http.StatusNoContent)
-		} else {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+
 	task := common.TaskResponse{Id: taskRow.Id.Hex(), PackageName: taskRow.PackageName, Type: []string{"benchmark"}}
 
 	return c.JSON(http.StatusOK, task)
@@ -82,9 +82,8 @@ func (h *handler) ApiSubmitTaskResult(c *echo.Context) error {
 	if err != nil {
 		if err == model.ErrNotFound {
 			return echo.NewHTTPError(http.StatusBadRequest, "Wrong Task Id!")
-		} else {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	fmt.Printf("task get and deleted: %#v\n", taskRow)

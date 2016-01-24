@@ -6,17 +6,15 @@ import (
 	"math/rand"
 	"time"
 )
-// RepositoryEngine stores repository source
+
+// RepositoryEngine represents supported source repository engines
 type RepositoryEngine string
 
+// Supported repository engines
+// TODO: Implement Bazaar and Mercurial support after GopherGala2016
 const (
-  //Git for git
-	Git RepositoryEngine = "git"
-
-	// TODO: Implement support after GopherGala
-	//Bazaar for bazaar
+	Git       RepositoryEngine = "git"
 	Bazaar    RepositoryEngine = "bazaar"
-	//Mercurial for mercurial
 	Mercurial RepositoryEngine = "mercurial"
 )
 
@@ -55,7 +53,7 @@ type PackageRow struct {
 	LastCommitId string `json:"lastCommitId"`
 }
 
-//RepositoryTag stores repo tags in db
+// RepositoryTag specifies repo tag provided by github.com
 type RepositoryTag struct {
 	Name   string `bson:"name"`
 	Zip    string `bson:"zip"`
@@ -96,9 +94,9 @@ func (p *Package) Add(pr *PackageRow) (*PackageRow, error) {
 	return pr, nil
 }
 
-// GetItem returns package my name. Returns error model.ErrNotFound
+// GetItem returns package my name. Returns nil, model.ErrNotFound if not found
 func (p *Package) GetItem(name string) (PackageRow, error) {
-	item := PackageRow{}
+	var item PackageRow
 
 	err := p.coll.Find(bson.M{"name": bson.RegEx{Pattern: name, Options: ""}}).One(&item)
 	if err != nil {
@@ -109,7 +107,8 @@ func (p *Package) GetItem(name string) (PackageRow, error) {
 	}
 	return item, nil
 }
-//GetItems get all items from db by name
+
+// GetItems searches packages by name in collection "package"
 func (p *Package) GetItems(name string) ([]PackageRow, error) {
 	var item []PackageRow
 	if err := p.coll.Find(bson.M{"name": bson.RegEx{Pattern: name, Options: ""}}).All(&item); err != nil {
@@ -137,7 +136,7 @@ func (p *Package) Favorites(userName string) ([]PackageRow, error) {
 	return items, nil
 }
 
-//GetItemsByIdSlice items returns all repositories
+// GetItemsByIdSlice returns all repositories
 func (p *Package) GetItemsByIdSlice(oids []bson.ObjectId) ([]PackageRow, error) {
 	var items []PackageRow
 	if err := p.coll.Find(bson.M{"_id": bson.M{"$in": oids}}).All(&items); err != nil && err != mgo.ErrNotFound {
@@ -145,14 +144,17 @@ func (p *Package) GetItemsByIdSlice(oids []bson.ObjectId) ([]PackageRow, error) 
 	}
 	return items, nil
 }
-// Items return slice of db objects
+
+// Items complient
 func (p *Package) Items(oids []bson.ObjectId) ([]PackageRow, error) {
 	return p.GetItemsByIdSlice(oids)
 }
-//DummyList mocks packageRow obj
+
+// DummyList returns random list of packages from collection
 func (p *Package) DummyList() ([]PackageRow, error) {
-	rInt := rand.Intn(10)
 	var items []PackageRow
+
+	rInt := rand.Intn(10)
 	if err := p.coll.Find(bson.M{}).Skip(rInt).Limit(10).All(&items); err != nil {
 		return nil, err
 	}

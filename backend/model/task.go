@@ -62,9 +62,8 @@ func (t *Task) Next(authKey string) (*TaskRow, error) {
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, ErrNotFound
-		} else {
-			return nil, err
 		}
+		return nil, err
 	}
 
 	// TODO: medium priority, mark the task as taken and release in N minutes
@@ -88,13 +87,13 @@ func (t *Task) Get(id string) (*TaskRow, error) {
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, ErrNotFound
-		} else {
-			return nil, err
 		}
+		return nil, err
 	}
 	return &tr, nil
 }
 
+// Exist reply true if task with identified by id exist in collection "task"
 func (t *Task) Exist(id string) (bool, error) {
 	_, err := t.Get(id)
 	return err == nil, err
@@ -108,9 +107,8 @@ func (t *Task) GetAndDelete(id string) (*TaskRow, error) {
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, ErrNotFound
-		} else {
-			return nil, err
 		}
+		return nil, err
 	}
 
 	return &tr, nil

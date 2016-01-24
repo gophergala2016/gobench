@@ -46,26 +46,3 @@ db.package.insert({"name": "github.com/valyala/fasthttp",
 
 
 
-
-Name string `bson:"name"`
-
-	// Url holds full package url
-	Url string `bson: "url"`
-
-	// Description of the package
-	Description string `bson:"description"`
-
-	// Repository holds repository url (https://github.com or https://labix.org, etc)
-	RepositoryUrl string `bson:"repositoryUrl"`
-
-	// Repository's engine
-	Engine RepositoryEngine `bson:"engine"`
-
-	// Created holds time
-	Created time.Time
-
-	// Created holds time of the last update
-	Updated time.Time
-
-	// LastCommitUid holds hash of the the last commit
-	LastCommitId string

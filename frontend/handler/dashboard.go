@@ -11,12 +11,13 @@ import (
 	"net/http"
 	"strings"
 )
-//TokenSource Storage for access token
+
+// TokenSource a storage for access token
 type TokenSource struct {
 	AccessToken string
 }
 
-// Token return access token
+// Token returns access token
 func (t *TokenSource) Token() (*oauth2.Token, error) {
 	token := &oauth2.Token{
 		AccessToken: t.AccessToken,
@@ -44,7 +45,7 @@ func (h *handler) DashboardGetHandler(c *echo.Context) error {
 			up = append(up, p.Id)
 		}
 		user.Packages = up
-		_, err = h.back.Model.User.UpsertUser(user)
+		_, err = h.back.Model.User.Upsert(user)
 		if err != nil {
 			log.Println(err)
 			return c.Redirect(http.StatusTemporaryRedirect, "/")
@@ -89,7 +90,7 @@ func (h *handler) RemoveFromFavPostHandler(c *echo.Context) error {
 		}
 	}
 	user.Packages = packages
-	_, err = h.back.Model.User.UpsertUser(user)
+	_, err = h.back.Model.User.Upsert(user)
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusBadRequest, err.Error())
@@ -115,7 +116,7 @@ func (h *handler) AddToFavPostHandler(c *echo.Context) error {
 	}
 
 	user.Packages = append(user.Packages, p.Id)
-	_, err = h.back.Model.User.UpsertUser(user)
+	_, err = h.back.Model.User.Upsert(user)
 	if err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusBadRequest, err.Error())
