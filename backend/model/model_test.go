@@ -64,5 +64,5 @@ func TestBenchmarkResult_DummyItems(t *testing.T) {
 	ttask, err := back.Model.Task.Get(string(task.Id))
 	t.Log(err, ttask)
 
-	result, _ := back.Model.BenchmarkResult.DummyItems()
+	//result, _ := back.Model.BenchmarkResult.DummyItems("")
 }
