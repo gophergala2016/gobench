@@ -9,8 +9,9 @@ import (
 )
 
 type Config struct {
-	AuthKey string `json: "authKey"`
-	Email   string `json: "email"`
+	AuthKey 	string `json: "authKey"`
+	Email   	string `json: "email"`
+	BaseUrl		string `json: "baseurl"`
 }
 
 func main() {
@@ -36,7 +37,7 @@ func realMain() int {
 	log := log.New(os.Stdout, "BEN ", log.Ldate|log.Ltime)
 	log.Println("Application launched")
 
-	br, err := NewBenchClient(config.AuthKey, config.Email, log)
+	br, err := NewBenchClient(config.AuthKey, config.Email, config.BaseUrl, log)
 	if err != nil {
 		log.Println("BenchRunner init failed. Details: ", err)
 		return 3

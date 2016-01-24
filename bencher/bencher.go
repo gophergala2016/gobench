@@ -21,10 +21,10 @@ import (
 )
 
 const (
-	baseUrl           = "http://127.0.0.1:8080"
+//	baseUrl           = "http://127.0.0.1:8080"
 	debug             = true
-	nextTaskUrl       = baseUrl + "/api/task/next"
-	submitResultUrl   = baseUrl + "/api/task/submit"
+	nextTaskLocation       = "/api/task/next"
+	submitResultLocation   = "/api/task/submit"
 	maxSubmitAttepmts = 5
 )
 
@@ -34,16 +34,22 @@ type BenchClient struct {
 	log           *log.Logger
 	authKey       string
 	email         string
+	baseUrl	      string
+	nextTaskUrl   string
+	submitResultUrl string
 	stopCh        chan os.Signal
 	specification string
 }
 
 // NewBenchClient creates BenchClient instance
-func NewBenchClient(authKey, email string, l *log.Logger) (*BenchClient, error) {
+func NewBenchClient(authKey, email, baseurl string, l *log.Logger) (*BenchClient, error) {
 
 	br := &BenchClient{
 		authKey: authKey,
 		email:   email,
+		baseUrl: baseurl,
+		nextTaskUrl: baseurl + nextTaskLocation,
+		submitResultUrl: baseurl + submitResultLocation,
 		client:  &http.Client{Timeout: 2 * time.Second},
 		log:     l,
 	}
@@ -68,7 +74,7 @@ func (br *BenchClient) Ping() error {
 func (br *BenchClient) ping() error {
 
 	// TODO: process HTTP 301
-	resp, err := br.client.Head(baseUrl)
+	resp, err := br.client.Head(br.baseUrl)
 	if err != nil {
 		return err
 	}
@@ -188,12 +194,14 @@ func (br *BenchClient) execTask() {
 // getNextTask retrives next benchmarking task from goben.ch server
 func (br *BenchClient) getNextTask() (*common.TaskResponse, bool, error) {
 
+	log.Println("getNextTask started")
+
 	buf, err := json.Marshal(common.TaskRequest{AuthKey: br.authKey, Email: br.email})
 	if err != nil {
 		return nil, false, err
 	}
 
-	resp, err := br.client.Post(nextTaskUrl, "application/json; charset=UTF-8", bytes.NewReader(buf))
+	resp, err := br.client.Post(br.nextTaskUrl, "application/json; charset=UTF-8", bytes.NewReader(buf))
 	if err != nil {
 		return nil, false, err
 	}
@@ -209,6 +217,8 @@ func (br *BenchClient) getNextTask() (*common.TaskResponse, bool, error) {
 			return nil, false, err
 		}
 
+    		log.Println( "getNextTask done. Task:", task.PackageUrl )
+
 		return &task, len(task.PackageUrl) > 0, nil
 	}
 
@@ -220,6 +230,7 @@ func (br *BenchClient) getNextTask() (*common.TaskResponse, bool, error) {
 
 	// other server responses
 	buf, _ = ioutil.ReadAll(resp.Body)
+	log.Println( "getNextTask done. No task received" )
 	return nil, false, errors.New(string(buf))
 }
 
@@ -231,7 +242,7 @@ func (br *BenchClient) submitResult(result *common.TaskResult) (bool, error) {
 		return true, err
 	}
 
-	resp, err := br.client.Post(submitResultUrl, "application/json; charset=UTF-8", bytes.NewReader(buf))
+	resp, err := br.client.Post(br.submitResultUrl, "application/json; charset=UTF-8", bytes.NewReader(buf))
 	if err != nil {
 		return true, err
 	}
