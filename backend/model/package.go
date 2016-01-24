@@ -3,8 +3,8 @@ package model
 import (
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
-	"time"
 	"math/rand"
+	"time"
 )
 
 type RepositoryEngine string
@@ -12,23 +12,23 @@ type RepositoryEngine string
 const (
 	Git RepositoryEngine = "git"
 
-// TODO: Implement support after GopherGala
+	// TODO: Implement support after GopherGala
 	Bazaar    RepositoryEngine = "bazaar"
 	Mercurial RepositoryEngine = "mercurial"
 )
 
 // PackageRow holds package attributes
 type PackageRow struct {
-	Id            bson.ObjectId `bson:"_id,omitempty"`
+	Id bson.ObjectId `bson:"_id,omitempty"`
 
 	// Name of package in a gopher way (labix.org/v2/mgo)
-	Name          string `bson:"name"`
+	Name string `bson:"name"`
 
 	// Url holds full package url
-	Url           string `bson: "url"`
+	Url string `bson: "url"`
 
 	// Description of the package
-	Description   string `bson:"description"`
+	Description string `bson:"description"`
 
 	// All tags of This repository
 	Tags []RepositoryTag `bson:"tags"`
@@ -37,22 +37,22 @@ type PackageRow struct {
 	RepositoryUrl string `bson:"repositoryUrl"`
 
 	// Repository's engine
-	Engine        RepositoryEngine `bson:"engine"`
+	Engine RepositoryEngine `bson:"engine"`
 
 	// Created holds time
-	Created       time.Time
+	Created time.Time `bson:"created"`
 
 	// Created holds time of the last update
-	Updated       time.Time
+	Updated time.Time `bson:"updated"`
 
 	// LastCommitUid holds hash of the the last commit
-	LastCommitId  string
+	LastCommitId string `json:"lastCommitId"`
 }
 
 type RepositoryTag struct {
-	Name string `bson: "name"`
-	Zip string `bson: "zip"`
-	Tar string `bson: "tar"`
+	Name   string `bson: "name"`
+	Zip    string `bson: "zip"`
+	Tar    string `bson: "tar"`
 	Commit string `bson: "commit"`
 }
 
@@ -89,9 +89,14 @@ func (p *Package) Add(pr *PackageRow) error {
 	return nil
 }
 
+// GetItem returns package my name. Returns error model.ErrNotFound
 func (p *Package) GetItem(name string) (PackageRow, error) {
 	item := PackageRow{}
-	if err := p.coll.Find(bson.M{"url": bson.RegEx{name, ""}}).One(&item); err != nil {
+	err := p.coll.Find(bson.M{"name": bson.RegEx{name, ""}}).One(&item)
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			return item, ErrNotFound
+		}
 		return item, err
 	}
 	return item, nil
@@ -136,7 +141,6 @@ func (p *Package) GetItemsByIdSlice(oids []bson.ObjectId) ([]PackageRow, error) 
 func (p *Package) Items(oids []bson.ObjectId) ([]PackageRow, error) {
 	return p.GetItemsByIdSlice(oids)
 }
-
 
 func (p *Package) DummyList() ([]PackageRow, error) {
 	rInt := rand.Intn(10)

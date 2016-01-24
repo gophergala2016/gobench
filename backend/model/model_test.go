@@ -34,7 +34,7 @@ func TestBenchmarkResult_DummyItems(t *testing.T) {
 
 	t.Log(back.Model.TestEnvironment.Items())
 
-	pkgs, err := back.Model.Package.All()
+	_, err = back.Model.Package.All()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,5 +59,10 @@ func TestBenchmarkResult_DummyItems(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(task)
+	t.Log("Next: ", task)
+
+	ttask, err := back.Model.Task.Get(string(task.Id))
+	t.Log(err, ttask)
+
+	result, _ := back.Model.BenchmarkResult.DummyItems()
 }

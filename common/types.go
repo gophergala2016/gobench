@@ -15,7 +15,7 @@ type TaskResponse struct {
 
 	// Type specifies task type.
 	// TODO: support different task types: Benchmark, Build, Vet, etc.
-	Type string `json:"type"`
+	Type []string `json:"type"`
 }
 
 type TaskResult struct {

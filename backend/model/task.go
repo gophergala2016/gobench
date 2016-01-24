@@ -68,7 +68,7 @@ func (t *Task) Register(pkgName, authKey string, typ []string) error {
 func (t *Task) Get(id string) (*TaskRow, error) {
 
 	var tr TaskRow
-	err := t.coll.FindId(bson.ObjectIdHex(id)).One(&tr) // .Sort("created").
+	err := t.coll.FindId(bson.ObjectId(id)).One(&tr) // .Sort("created").
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, ErrNotFound
