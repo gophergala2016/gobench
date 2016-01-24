@@ -34,7 +34,7 @@ func NewUser(db *mgo.Database) (*User, error) {
 func (u *User) CreateOrUpdateUser(ur *UserRow) (*mgo.ChangeInfo, error) {
 	mu, err := u.GetByLogin(ur.Login)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if (mu != &UserRow{}) {
 		mu.Token = ur.Token

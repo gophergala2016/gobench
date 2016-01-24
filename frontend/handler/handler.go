@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/syntaqx/echo-middleware/session"
 	"net/http"
+	"github.com/gophergala2016/gobench/backend/model"
 )
 
 // GithubConfig holds GitHub app credentials
@@ -40,5 +41,17 @@ func (h *handler) NotFoundHandler(err error, c *echo.Context) {
 }
 
 func (h *handler) IndexGetHandler(c *echo.Context) error {
-	return c.Render(http.StatusOK, "index.html", nil)
+	n, _ := h.back.Model.Package.DummyList()
+	p, _ := h.back.Model.Package.DummyList()
+	u, _ := h.back.Model.Package.DummyList()
+	data := struct {
+		New []model.PackageRow
+		Popular []model.PackageRow
+		Updated []model.PackageRow
+	} {
+		n,
+		p,
+		u,
+	}
+	return c.Render(http.StatusOK, "index.html", data)
 }
