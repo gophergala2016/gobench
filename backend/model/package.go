@@ -59,12 +59,12 @@ func NewPackage(db *mgo.Database) (*Package, error) {
 		return nil, err
 	}
 	for i := range idx {
-		if len(idx[i].Key) > 0 && idx[i].Key[0] == "url" {
+		if len(idx[i].Key) > 0 && idx[i].Key[0] == "name" {
 			return p, nil
 		}
 	}
 
-	return p, p.coll.EnsureIndex(mgo.Index{Key: []string{"url"}, Unique: true, DropDups: true})
+	return p, p.coll.EnsureIndex(mgo.Index{Key: []string{"name"}, Unique: true, DropDups: true})
 }
 
 // Add inserts new package and ignores if package exist aready
@@ -80,7 +80,7 @@ func (p *Package) Add(pr *PackageRow) error {
 
 func (p *Package) GetItem(name string) ([]PackageRow, error) {
 	item := make([]PackageRow, 0)
-	if err := p.coll.Find(bson.M{"url": bson.RegEx{name, ""}}).All(&item); err != nil {
+	if err := p.coll.Find(bson.M{"name": bson.RegEx{name, ""}}).All(&item); err != nil {
 		return nil, err
 	}
 	return item, nil
@@ -89,7 +89,7 @@ func (p *Package) GetItem(name string) ([]PackageRow, error) {
 // All returns all packages
 func (p *Package) All() ([]PackageRow, error) {
 	items := make([]PackageRow, 0)
-	if err := p.coll.Find(nil).All(&items); err != mgo.ErrNotFound {
+	if err := p.coll.Find(nil).All(&items); err != nil && err != mgo.ErrNotFound {
 		return nil, err
 	}
 	return items, nil
@@ -99,7 +99,7 @@ func (p *Package) All() ([]PackageRow, error) {
 func (p *Package) Favorites(userName string) ([]PackageRow, error) {
 	items := make([]PackageRow, 0)
 	// TODO: добавить условие поиска/фильтрации
-	if err := p.coll.Find(nil).All(&items); err != mgo.ErrNotFound {
+	if err := p.coll.Find(nil).All(&items); err != nil && err != mgo.ErrNotFound {
 		return nil, err
 	}
 	return items, nil
@@ -112,7 +112,7 @@ func (p *Package) GetItemsByIdSlice(ids []string) ([]PackageRow, error) {
 		oids[i] = bson.ObjectIdHex(ids[i])
 	}
 	items := make([]PackageRow, 0)
-	if err := p.coll.Find(bson.M{"_id": bson.M{"$in": oids}}).All(&items); err != nil {
+	if err := p.coll.Find(bson.M{"_id": bson.M{"$in": oids}}).All(&items); err != nil && err != nil {
 		return nil, err
 	}
 	return items, nil

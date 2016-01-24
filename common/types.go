@@ -10,8 +10,8 @@ type TaskRequest struct {
 }
 
 type TaskResponse struct {
-	Id         string `json:"id"`
-	PackageUrl string `json:"packageUrl"`
+	Id          string `json:"id"`
+	PackageName string `json:"packageName"`
 
 	// Type specifies task type.
 	// TODO: support different task types: Benchmark, Build, Vet, etc.
@@ -23,7 +23,7 @@ type TaskResult struct {
 	Id            string `json:"id"`
 	Specification string `json: "specification"`
 
-	// Round holds parsed bencmark results per GoMaxProcs 1-8
+	// Round holds parsed bencmark results per GoMaxProcs "cpu1", "cpu2", "cpu4"
 	Round      map[string]parse.Set
 	BuildError string `json:"buildError"`
 }
