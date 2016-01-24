@@ -6,10 +6,10 @@ import (
 	"github.com/labstack/echo"
 	"github.com/syntaqx/echo-middleware/session"
 	"golang.org/x/oauth2"
+	"labix.org/v2/mgo/bson"
 	"log"
 	"net/http"
 	"strings"
-	"labix.org/v2/mgo/bson"
 )
 
 type TokenSource struct {
@@ -65,7 +65,6 @@ func (h *handler) DashboardGetHandler(c *echo.Context) error {
 
 }
 
-
 func (h *handler) RemoveFromFavPostHandler(c *echo.Context) error {
 
 	s := session.Default(c)
@@ -98,7 +97,6 @@ func (h *handler) RemoveFromFavPostHandler(c *echo.Context) error {
 	return c.JSON(http.StatusOK, nil)
 }
 
-
 func (h *handler) AddToFavPostHandler(c *echo.Context) error {
 	s := session.Default(c)
 	if s.Get("user") == "" {
@@ -124,7 +122,6 @@ func (h *handler) AddToFavPostHandler(c *echo.Context) error {
 
 	return c.JSON(http.StatusOK, nil)
 }
-
 
 func addUserRepos(h *handler, u *model.UserRow) ([]*model.PackageRow, error) {
 
@@ -168,9 +165,9 @@ func addUserRepos(h *handler, u *model.UserRow) ([]*model.PackageRow, error) {
 }
 
 func getRepoTags(user string, repoName string, client *github.Client) []model.RepositoryTag {
-	tags := make([]model.RepositoryTag,0,1)
-	githubTags,_,_ := client.Repositories.ListTags(user,repoName,nil)
-	for _,v := range githubTags {
+	tags := make([]model.RepositoryTag, 0, 1)
+	githubTags, _, _ := client.Repositories.ListTags(user, repoName, nil)
+	for _, v := range githubTags {
 		tags = append(tags, model.RepositoryTag{Name: *v.Name, Zip: *v.ZipballURL, Tar: *v.TarballURL, Commit: *v.Commit.URL})
 	}
 	return tags

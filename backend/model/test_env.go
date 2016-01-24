@@ -35,7 +35,7 @@ type TestEnvironment struct {
 }
 
 func NewTestEnvironment(db *mgo.Database) (*TestEnvironment, error) {
-	ws := &TestEnvironment{db: db, coll: db.C("TestEnv")}
+	ws := &TestEnvironment{db: db, coll: db.C("testEnv")}
 	return ws, nil
 }
 

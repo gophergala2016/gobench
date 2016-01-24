@@ -27,13 +27,13 @@ func (h *handler) ApiNextTaskHandler(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
+	//
 	if !ok {
 		return echo.NewHTTPError(http.StatusBadRequest, "Wrong authKey!")
 	}
 
 	// retrives single task
 	taskRow, err := h.back.Model.Task.Next(taskReq.AuthKey)
-
 	if err != nil {
 		if err == model.ErrNotFound {
 			return echo.NewHTTPError(http.StatusNoContent)
@@ -41,7 +41,7 @@ func (h *handler) ApiNextTaskHandler(c *echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
-	task := common.TaskResponse{Id: taskRow.Id.String(), PackageUrl: taskRow.PackageUrl, Type: "benchmark"}
+	task := common.TaskResponse{Id: taskRow.Id.String(), PackageName: taskRow.PackageName, Type: []string{"benchmark"}}
 
 	return c.JSON(http.StatusOK, task)
 }
@@ -69,15 +69,22 @@ func (h *handler) ApiSubmitTaskResult(c *echo.Context) error {
 	}
 
 	// retrives single task to update
-	taskRow, err := h.back.Model.Task.Next(tr.AuthKey)
+	taskRow, err := h.back.Model.Task.Get(tr.Id)
 	if err != nil {
 		if err == model.ErrNotFound {
-			return echo.NewHTTPError(http.StatusNoContent)
+			return echo.NewHTTPError(http.StatusBadRequest, "Wrong Task Id!")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
 
-	task := common.TaskResponse{Id: taskRow.Id.String(), PackageUrl: taskRow.PackageUrl}
-	return c.JSON(http.StatusOK, &task)
+	err = h.back.Model.BenchmarkResult.Add(taskRow.PackageName, tr.Specification, tr.Round)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	// TODO:
+	// если сохранение прошло нормально, удалить запись из task
+
+	return echo.NewHTTPError(http.StatusOK)
 }

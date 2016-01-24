@@ -10,7 +10,7 @@ import (
 )
 
 // DatabaseConfig holds MongoDB connection params
-type databaseConfig struct {
+type DatabaseConfig struct {
 	IP   string `json:"ip"`
 	Port int    `json:"port"`
 	Name string `json:"name"`
@@ -18,8 +18,8 @@ type databaseConfig struct {
 
 // Config holds backend configuration params
 type Config struct {
-	Mongo  databaseConfig `json:"mongo"`
-	Debug  bool           `json:"debug"`
+	Mongo DatabaseConfig `json:"mongo"`
+	Debug bool           `json:"debug"`
 }
 
 // Backend provides single point of access to business layer
@@ -28,7 +28,7 @@ type Backend struct {
 	Job      *job.Job
 	session  *mgo.Session
 	log      *log.Logger
-	dbConfig databaseConfig
+	dbConfig DatabaseConfig
 }
 
 // New creates Backend instance, connects to database and initialise caches
