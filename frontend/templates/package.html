@@ -21,20 +21,20 @@
                 <div class="box box-solid">
                     <ul>
                         {{range .Package.Tags }}
-                    <li>
-                    <div class="box-body">
-                    <b>{{ .Name }}</b>
-                    <a href="{{.Tar}}" inline> .Tar</a>
-                    <a href="{{.Zip}}"> .Zip</a>
-                    </div>
-                    </li>
-                    {{end}}
+                        <li>
+                            <div class="box-body">
+                                <b>{{ .Name }}</b>
+                                <a href="{{.Tar}}" inline> .Tar</a>
+                                <a href="{{.Zip}}"> .Zip</a>
+                            </div>
+                        </li>
+                        {{end}}
                     </ul>
-                    </div>
                 </div>
-                <!-- /.box-body -->
             </div>
+            <!-- /.box-body -->
         </div>
+    </div>
     </div>
 </section>
 {{end}}
