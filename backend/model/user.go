@@ -26,7 +26,7 @@ type User struct {
 }
 
 func NewUser(db *mgo.Database) (*User, error) {
-	u := &User{db: db, coll: db.C("User")}
+	u := &User{db: db, coll: db.C("user")}
 	return u, nil
 }
 
