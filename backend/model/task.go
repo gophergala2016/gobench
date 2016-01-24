@@ -16,8 +16,8 @@ type TaskRow struct {
 	// AuthKey holds key identifies testing environment
 	AuthKey string `bson:"authKey"`
 
-	// Created holds row creation time. Uses for sorting
-	Created time.Time
+	// Assigned holds tasks assignment time. Used for excluding
+	Assigned time.Time `bson:"assigned"`
 }
 
 // Task provides single point of access to all bench tasks to execute
@@ -45,5 +45,27 @@ func (t *Task) Next(authKey string) (*TaskRow, error) {
 		}
 	}
 
+	/*
+		TODO: ставить признак, что задача отдана в работу, что бы не выдать ее еще кому то
+		err := t.coll.UpdateAll(bson.M{"assigned": ""}, bson.M{"assigned": time.Now()})
+		if err != nil {
+			return nil, err
+		}
+	*/
+	return &tr, nil
+}
+
+// Next returns next task for test environment identified by authKey
+func (t *Task) Get(id string) (*TaskRow, error) {
+
+	var tr TaskRow
+	err := t.coll.FindId(bson.ObjectIdHex(id)).One(&tr) // .Sort("created").
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			return nil, ErrNotFound
+		} else {
+			return nil, err
+		}
+	}
 	return &tr, nil
 }

@@ -9,6 +9,7 @@ import (
 	"net/http"
 )
 
+// ApiNextTaskHandler implements method for getting next task from the queue
 func (h *handler) ApiNextTaskHandler(c *echo.Context) error {
 
 	enc := json.NewDecoder(c.Request().Body)
@@ -31,7 +32,7 @@ func (h *handler) ApiNextTaskHandler(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Wrong authKey!")
 	}
 
-	// retrives single task to do
+	// retrives single task
 	taskRow, err := h.back.Model.Task.Next(taskReq.AuthKey)
 
 	if err != nil {
@@ -42,11 +43,11 @@ func (h *handler) ApiNextTaskHandler(c *echo.Context) error {
 		}
 	}
 	task := common.TaskResponse{Id: taskRow.Id.String(), PackageUrl: taskRow.PackageUrl, Type: "benchmark"}
-	fmt.Printf("%#v\n%#v\n%#v\n", taskReq, taskRow, task)
 
 	return c.JSON(http.StatusOK, task)
 }
 
+// ApiSubmitTaskResult implements saving of benchmark result
 func (h *handler) ApiSubmitTaskResult(c *echo.Context) error {
 
 	var tr common.TaskResult

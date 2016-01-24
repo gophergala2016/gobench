@@ -20,7 +20,7 @@ const (
 type PackageRow struct {
 	Id bson.ObjectId `bson:"_id,omitempty"`
 
-	// Name of package in a gopher way
+	// Name of package in a gopher way (labix.org/v2/mgo)
 	Name string `bson:"name"`
 
 	// Url holds full package url
@@ -30,7 +30,7 @@ type PackageRow struct {
 	Description string `bson:"description"`
 
 	// Repository holds repository url (https://github.com or https://labix.org, etc)
-	RepositoryUrl string `bson:"repository"`
+	RepositoryUrl string `bson:"repositoryUrl"`
 
 	// Repository's engine
 	Engine RepositoryEngine `bson:"engine"`
@@ -116,4 +116,8 @@ func (p *Package) GetItemsByIdSlice(ids []string) ([]PackageRow, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+func (p *Package) Items(ids []string) ([]PackageRow, error) {
+	return p.GetItemsByIdSlice(ids)
 }

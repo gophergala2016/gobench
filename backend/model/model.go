@@ -13,11 +13,11 @@ var (
 
 // Model provides single point of access to all models
 type Model struct {
-	Repository      *Repository
 	Package         *Package
 	User            *User
 	TestEnvironment *TestEnvironment
 	Task            *Task
+	BenchmarkResult *BenchmarkResult
 	logger          *log.Logger
 }
 
@@ -27,11 +27,6 @@ func New(db *mgo.Database, l *log.Logger) (*Model, error) {
 	var err error
 
 	m := &Model{logger: l}
-
-	m.Repository, err = NewRepository(db)
-	if err != nil {
-		return nil, err
-	}
 
 	m.Package, err = NewPackage(db)
 	if err != nil {
@@ -49,6 +44,11 @@ func New(db *mgo.Database, l *log.Logger) (*Model, error) {
 	}
 
 	m.Task, err = NewTask(db)
+	if err != nil {
+		return nil, err
+	}
+
+	m.BenchmarkResult, err = NewBenchmarkResult(db)
 	if err != nil {
 		return nil, err
 	}
