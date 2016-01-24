@@ -8,10 +8,13 @@
                     <h1 class="box-title">{{ .Package.Url }}</h1>
                     <span><i class="fa fa-download"></i>&nbsp;go get {{ .Package.Url }}</span>
                 </div>
-                <!-- /.box-header -->
+                <h2> {{ .Package.Description }} </h2>
                 <div class="box-body">
-
-                    <p>asdfsad</p>
+                    {{range .Package.Tags }}
+                    <h4>{{ .Name }}</h4>
+                    <a href=".tar"> {{ .Tar}}</a>
+                    <a href=".zip"> {{ .Zip}}</a>
+                    {{end}}
                 </div>
                 <!-- /.box-body -->
             </div>

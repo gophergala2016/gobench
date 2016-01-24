@@ -2,7 +2,6 @@ package handler
 
 
 import (
-//  "github.com/gophergala2016/gobench/backend/model"
 	"github.com/labstack/echo"
 	"github.com/labstack/gommon/log"
 	"net/http"
