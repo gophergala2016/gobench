@@ -11,11 +11,12 @@ import (
 	"net/http"
 	"strings"
 )
-
+//TokenSource Storage for access token
 type TokenSource struct {
 	AccessToken string
 }
 
+// Token return access token
 func (t *TokenSource) Token() (*oauth2.Token, error) {
 	token := &oauth2.Token{
 		AccessToken: t.AccessToken,
@@ -140,7 +141,7 @@ func addUserRepos(h *handler, u *model.UserRow) ([]*model.PackageRow, error) {
 		return nil, err
 	}
 
-	packages := make([]*model.PackageRow, 0)
+	var packages []*model.PackageRow
 	for _, repo := range repoList {
 		if repo.Language != nil && *repo.Language == "Go" {
 			pr := &model.PackageRow{

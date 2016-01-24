@@ -33,7 +33,7 @@ type TestEnvironment struct {
 	db   *mgo.Database
 	coll *mgo.Collection
 }
-
+// NewTestEnvironment create and return new environment
 func NewTestEnvironment(db *mgo.Database) (*TestEnvironment, error) {
 	ws := &TestEnvironment{db: db, coll: db.C("testEnv")}
 	return ws, nil
@@ -41,7 +41,7 @@ func NewTestEnvironment(db *mgo.Database) (*TestEnvironment, error) {
 
 // Items returns all test environments sorted by Weight (asc)
 func (te *TestEnvironment) Items() ([]TestEnvironmentRow, error) {
-	items := make([]TestEnvironmentRow, 0)
+	var items []TestEnvironmentRow
 	err := te.coll.Find(nil).Sort("weight").All(&items)
 	return items, err
 }

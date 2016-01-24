@@ -110,7 +110,6 @@ func (br *BenchClient) run() {
 		}
 		br.execTask()
 	}
-	return
 }
 
 func (br *BenchClient) execTask() {

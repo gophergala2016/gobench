@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 )
-
+//Config configs for backend
 type Config struct {
 	AuthKey string `json: "authKey"`
 	Email   string `json: "email"`

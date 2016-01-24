@@ -6,14 +6,17 @@ import (
 	"math/rand"
 	"time"
 )
-
+// RepositoryEngine stores repository source
 type RepositoryEngine string
 
 const (
+  //Git for git
 	Git RepositoryEngine = "git"
 
 	// TODO: Implement support after GopherGala
+	//Bazaar for bazaar
 	Bazaar    RepositoryEngine = "bazaar"
+	//Mercurial for mercurial
 	Mercurial RepositoryEngine = "mercurial"
 )
 
@@ -52,6 +55,7 @@ type PackageRow struct {
 	LastCommitId string `json:"lastCommitId"`
 }
 
+//RepositoryTag stores repo tags in db
 type RepositoryTag struct {
 	Name   string `bson:"name"`
 	Zip    string `bson:"zip"`
@@ -105,9 +109,9 @@ func (p *Package) GetItem(name string) (PackageRow, error) {
 	}
 	return item, nil
 }
-
+//GetItems get all items from db by name
 func (p *Package) GetItems(name string) ([]PackageRow, error) {
-	item := make([]PackageRow, 0)
+	var item []PackageRow
 	if err := p.coll.Find(bson.M{"name": bson.RegEx{Pattern: name, Options: ""}}).All(&item); err != nil {
 		return nil, err
 	}
@@ -116,7 +120,7 @@ func (p *Package) GetItems(name string) ([]PackageRow, error) {
 
 // All returns all packages
 func (p *Package) All() ([]PackageRow, error) {
-	items := make([]PackageRow, 0)
+	var items []PackageRow
 	if err := p.coll.Find(nil).All(&items); err != nil && err != mgo.ErrNotFound {
 		return nil, err
 	}
@@ -125,7 +129,7 @@ func (p *Package) All() ([]PackageRow, error) {
 
 // Favorites returns packages starred by github user
 func (p *Package) Favorites(userName string) ([]PackageRow, error) {
-	items := make([]PackageRow, 0)
+	var items []PackageRow
 	// TODO: добавить условие поиска/фильтрации
 	if err := p.coll.Find(nil).All(&items); err != nil && err != mgo.ErrNotFound {
 		return nil, err
@@ -133,22 +137,22 @@ func (p *Package) Favorites(userName string) ([]PackageRow, error) {
 	return items, nil
 }
 
-// Items returns all repositories
+//GetItemsByIdSlice items returns all repositories
 func (p *Package) GetItemsByIdSlice(oids []bson.ObjectId) ([]PackageRow, error) {
-	items := make([]PackageRow, 0)
+	var items []PackageRow
 	if err := p.coll.Find(bson.M{"_id": bson.M{"$in": oids}}).All(&items); err != nil && err != mgo.ErrNotFound {
 		return nil, err
 	}
 	return items, nil
 }
-
+// Items return slice of db objects
 func (p *Package) Items(oids []bson.ObjectId) ([]PackageRow, error) {
 	return p.GetItemsByIdSlice(oids)
 }
-
+//DummyList mocks packageRow obj
 func (p *Package) DummyList() ([]PackageRow, error) {
 	rInt := rand.Intn(10)
-	items := make([]PackageRow, 0)
+	var items []PackageRow
 	if err := p.coll.Find(bson.M{}).Skip(rInt).Limit(10).All(&items); err != nil {
 		return nil, err
 	}

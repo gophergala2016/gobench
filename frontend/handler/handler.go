@@ -10,10 +10,10 @@ import (
 
 // GithubConfig holds GitHub app credentials
 type githubConfig struct {
-	ClientId     string `json:"clientId"`
+	ClientId    string `json:"clientId"`
 	ClientSecret string `json:"clientSecret"`
 }
-
+//HandlerConfig for Github
 type HandlerConfig struct {
 	Github githubConfig `json:"github"`
 }
@@ -24,6 +24,7 @@ type handler struct {
 	back  *backend.Backend
 }
 
+//New Create new handler
 func New(cfg *HandlerConfig, store session.CookieStore, b *backend.Backend) handler {
 	return handler{cfg: cfg, store: store, back: b}
 }

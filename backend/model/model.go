@@ -6,6 +6,7 @@ import (
 	"log"
 )
 
+// stores errors
 var (
 	ErrAuthKey  = errors.New("Wrong authKey value!")
 	ErrNotFound = errors.New("Not found!")
@@ -56,7 +57,7 @@ func New(db *mgo.Database, l *log.Logger) (*Model, error) {
 	return m, nil
 }
 
-// PackageName registers individual task for each test environment
+//RegisterTasks registers individual task for each test environment
 func (m *Model) RegisterTasks(pkgName string) error {
 
 	te, err := m.TestEnvironment.Items()

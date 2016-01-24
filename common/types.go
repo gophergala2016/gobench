@@ -4,11 +4,13 @@ import (
 	"golang.org/x/tools/benchmark/parse"
 )
 
+// TaskRequest stores info about task's author
 type TaskRequest struct {
 	AuthKey string `json: "authKey"`
 	Email   string `json: "email"`
 }
 
+// TaskResponse stores responses of tasks
 type TaskResponse struct {
 	Id          string `json:"id"`
 	PackageName string `json:"packageName"`
@@ -18,6 +20,7 @@ type TaskResponse struct {
 	Type []string `json:"type"`
 }
 
+// TaskResult stores result(errors) of task
 type TaskResult struct {
 	TaskRequest
 	Id            string `json:"id"`
