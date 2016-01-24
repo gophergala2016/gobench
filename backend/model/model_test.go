@@ -55,7 +55,7 @@ func TestBenchmarkResult_DummyItems(t *testing.T) {
 	}
 	t.Log(pkg, err)
 
-	task, err := back.Model.Task.Next("change-secret-1")
+	task, err := back.Model.Task.NextExperiment("change-secret-1")
 	if err != nil {
 		t.Fatal(err)
 	}
