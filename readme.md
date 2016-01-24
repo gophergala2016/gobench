@@ -1,23 +1,27 @@
 # goben.ch
-The Golang community's repositories benchmarking
+The Golang community's repositories benchmarking and tracking service
 
 
 ## Purpose
 - Single point of access to all golang community's packages
 - Automatic package benchmarking including: linter, vet, test, bench, etc
+- Package changes capture and re-benchmarking
 - Package benchmark history
-- Favorite package notifications
+- User notifications
 
+## Inspiration
+- Ruby world: https://rubygems.org
+- Rust: https://crates.io
+- Go world: https://godoc.org
 
 ## How to use?
-- We believe you have github account
-- If so, you do have some packages starred
+- Most probably you have github account
+- If so, you are interested in some packages
 - Visit http://goben.ch
 - Sign in with your https://github.com account
 - We'll take a list of your starred golang repositories
-- From this moment http://goben.ch tracks these repository changes
 - http://goben.ch pulls package and it's dependencies
-- Do package benchmarking on different platforms and OS, including
+- http://goben.ch benchmarks package on different platforms and OS, including
 	- Bare metal server with different OS
 	- Several Digital Ocean portlets (5$, 10$)
 	- GAE
@@ -25,14 +29,25 @@ The Golang community's repositories benchmarking
 	- Docker in VM
 	- Docker on bare metal
 - Discover benchmarking reports on a package page http://goben.ch/p/{golang_package_name}
+- http://goben.ch starts keeping eye on this package
+- http://goben.ch re-benchmarks if changes captured
 
-## TODO list
+## TODO List
 - Repositories supported
 	- [X] https://github.com
-	- [ ] https://bitbacket.com
-	- [ ] https://labix.com
+	- [ ] https://bitbucket.org
+	- [ ] https://labix.org
 	- [ ] others
-- Benchmarking
+- Packages capture
+	- [X] User's favorites on github
+	- [ ] Manually
+	- [ ] Automatically from package dependencies
+	- [ ] other
+- Vendoring
+	- [X] Standard
+	- [ ] GO15VENDOREXPERIMENT
+	- [ ] others
+- Package benchmarking
 	- [X] go test -bench
 	- [ ] go test
 	- [ ] vet
@@ -46,10 +61,13 @@ The Golang community's repositories benchmarking
 	- [ ] Docker in VM
 	- [ ] Docker on bare metal
 	- [ ] others
+- Notifications
+	- [ ] Dashboard
+	- [ ] Slack
+	- [ ] others
+- Badge generator
+	- [ ] design selector and generator
 
-## Inspiration
-- Ruby world: https://rubygems.org/gems
-- Rust: https://crates.io/
 
 ## License
 MIT
