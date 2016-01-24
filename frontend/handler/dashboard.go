@@ -149,7 +149,7 @@ func addUserRepos(h *handler, u *model.UserRow) ([]*model.PackageRow, error) {
 			pr := &model.PackageRow{
 				//Name:   *repo.Name,
 				Name:          strings.Replace(*repo.HTMLURL, "https://github.com/", "", -1),
-				Author:        *u.Login,
+				Author:        u.Login,
 				Url:           *repo.HTMLURL,
 				Description:   *repo.Description,
 				RepositoryUrl: "https://github.com",
