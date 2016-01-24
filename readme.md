@@ -13,7 +13,7 @@ The Golang community's repositories benchmarking and tracking service
 - Rust: https://crates.io
 - Go world: https://godoc.org
 
-## How to use?
+## Usage scenario
 - Most probably you have github account
 - If so, you are interested in some packages
 - Visit http://goben.ch
