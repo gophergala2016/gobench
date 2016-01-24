@@ -3,9 +3,25 @@
 <section class="container">
     <div class="row">
         {{range .Packages}}
-            {{.Url}}<br>
+        <div class="col-xs-6 package" data-bench="502,635,809,947,1402">
+            <div class="box box-solid">
+                    <div class="box-header with-border">
+                        <a href="/{{.Url}}">
+                            <h3 class="box-title">{{.Url}}</h3>
+                        </a>
+                        <div class="box-tools pull-right">
+                            <a class="btn btn-box-tool fav" data-widget="collapse"><i
+                                    class="fa fa-heart"></i>
+                            </a>
+                        </div>
+                    </div>
+                <div class="box-body">
+                    <div style="height: 200px;" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
         {{else}}
-            Your dashboard is empty. You can follow packages in search results.
+        Your dashboard is empty. You can follow packages in search results.
         {{end}}
     </div>
 </section>

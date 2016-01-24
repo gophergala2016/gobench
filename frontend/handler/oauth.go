@@ -64,6 +64,9 @@ func (h *handler) OauthCallbackHandler(c *echo.Context) error {
 		s.Set("just_signup", true)
 	}
 	s.Set("user", userLogin)
+	// hack to display username in header
+	http.SetCookie(c.Response(), &http.Cookie{Name: "username", Value: userLogin, Path: "/"})
+	http.SetCookie(c.Response(), &http.Cookie{Name: "useravatar", Value: *user.AvatarURL, Path: "/"})
 	s.Set("token", userToken)
 	s.Save()
 

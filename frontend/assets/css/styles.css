@@ -135,3 +135,20 @@ footer .nav>li>a:hover {
     border-bottom-left-radius: 3px;
     padding: 10px;
 }
+
+#login-info img {
+    width: 20px;
+}
+
+.chart-container {
+    height: 200px;
+}
+
+.box-header a {
+    color: #444;
+    text-decoration: none;
+}
+
+.box-header a.fav {
+    margin-top: -6px;
+}
