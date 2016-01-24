@@ -16,13 +16,12 @@ The Golang community's repositories benchmarking and tracking service
 
 ## How to use?
 - Most probably you have github account
-- If so, you do have some packages starred
+- If so, you are interested in some packages
 - Visit http://goben.ch
 - Sign in with your https://github.com account
 - We'll take a list of your starred golang repositories
-- http://goben.ch starts keeping eye on these packages
-- http://goben.ch pulls packages and it's dependencies
-- http://goben.ch benchmarks each package on different platforms and OS, including
+- http://goben.ch pulls package and it's dependencies
+- http://goben.ch benchmarks package on different platforms and OS, including
 	- Bare metal server with different OS
 	- Several Digital Ocean portlets (5$, 10$)
 	- GAE
@@ -30,6 +29,8 @@ The Golang community's repositories benchmarking and tracking service
 	- Docker in VM
 	- Docker on bare metal
 - Discover benchmarking reports on a package page http://goben.ch/p/{golang_package_name}
+- http://goben.ch starts keeping eye on this package
+- http://goben.ch re-benchmarks if changes captured
 
 ## TODO List
 - Repositories supported
