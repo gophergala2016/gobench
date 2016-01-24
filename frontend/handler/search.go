@@ -11,7 +11,7 @@ import (
 
 func (h *handler) SearchbackHandler(c *echo.Context) error {
 	searchq := c.Query("search")
-	packages,err := h.back.Model.Package.GetItem(searchq)
+	packages,err := h.back.Model.Package.GetItems(searchq)
 	  if err != nil {
 		  log.Error(err)
 		  return c.Redirect(http.StatusTemporaryRedirect, "/")

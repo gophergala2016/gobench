@@ -7,16 +7,16 @@ import (
 
 // PackageRow holds package attributes
 type PackageRow struct {
-	Id bson.ObjectId
+	Id           bson.ObjectId `bson:"_id,omitempty"`
 
 	// Url
-	Url string `bson: "url"`
+	Url          string `bson: "url"`
 
 	// Description of the package
-	Description string `bson:"description"`
+	Description  string `bson:"description"`
 
 	// Repository's engine
-	Engine RepositoryEngine `bson:"engine`
+	Engine       RepositoryEngine `bson:"engine`
 
 	// PackageCount holds amount of packages store in the repository
 	PackageCount int `bson:"packagecount"`
@@ -34,12 +34,20 @@ func NewPackage(db *mgo.Database) (*Package, error) {
 	return r, nil
 }
 
-func (r *Package) GetItem(name string) ([]PackageRow, error) {
-      item := make([]PackageRow,0)
-      if err := r.coll.Find(bson.M{"url": bson.RegEx{name,""}}).All(&item); err != nil {
-		  return nil, err
-	  }
-	 return item, nil
+func (r *Package) GetItem(name string) (PackageRow, error) {
+	var item PackageRow
+	if err := r.coll.Find(bson.M{"url": name}).One(&item); err != nil {
+		return PackageRow{}, err
+	}
+	return item, nil
+}
+
+func (r *Package) GetItems(name string) ([]PackageRow, error) {
+	items := make([]PackageRow, 0)
+	if err := r.coll.Find(bson.M{"url": bson.RegEx{name, ""}}).All(&items); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 // Items returns all packages
@@ -62,11 +70,7 @@ func (r *Package) Favorites(userName string) ([]PackageRow, error) {
 }
 
 // Items returns all repositories
-func (r *Package) GetItemsByIdSlice(ids []string) ([]PackageRow, error) {
-	oids := make([]bson.ObjectId, len(ids))
-	for i := range ids {
-		oids[i] = bson.ObjectIdHex(ids[i])
-	}
+func (r *Package) GetItemsByIdSlice(oids []bson.ObjectId) ([]PackageRow, error) {
 	items := make([]PackageRow, 0)
 	if err := r.coll.Find(bson.M{"_id": bson.M{"$in": oids}}).All(&items); err != nil {
 		return nil, err

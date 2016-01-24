@@ -54,7 +54,7 @@ func (h *handler) OauthCallbackHandler(c *echo.Context) error {
 		Token:     userToken,
 		AvatarURL: *user.AvatarURL,
 	}
-	ci, err := h.back.Model.User.CreateUser(&u)
+	ci, err := h.back.Model.User.UpsertUser(&u)
 	if err != nil {
 		log.Println(err.Error())
 		return c.Redirect(http.StatusTemporaryRedirect, "/")

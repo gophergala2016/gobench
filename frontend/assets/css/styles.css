@@ -152,3 +152,11 @@ footer .nav>li>a:hover {
 .box-header a.fav {
     margin-top: -6px;
 }
+
+.box-header h1 {
+    font-size: 27px;
+}
+
+.box-header span {
+    display: block;
+}

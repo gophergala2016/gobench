@@ -27,9 +27,31 @@ $(document).ready(function () {/* activate scrollspy menu */
         );
     }
 
+    $('.fav').click(function () {
+
+        var icon = $('.fav').find('i');
+        var action = icon.hasClass("fa-heart-o") ? "add" : "remove";
+        var title = $(this).parent().prev().text().trim();
+        $.ajax("/fav/" + action, {
+            method: "POST",
+            data: {package: title},
+            dataType: "json"
+        });
+
+        if (action == "add") {
+            icon.removeClass("fa-heart-o").addClass("fa-heart");
+        } else {
+            icon.removeClass("fa-heart").addClass("fa-heart-o");
+        }
+
+        if (typeof $(this).parents('.package') !== 'undefined' ) {
+            $(this).parents('.package').remove();
+        }
+    });
+
     $('.package').each(function () {
             var data = $(this).data("bench").split(",").map(function (e) {return parseInt(e)});
-            var title = $(this).find("box-title").text();
+            var title = $(this).find(".box-title").text();
             $(this).find('.chart-container').highcharts({
                 chart: {
                     type: 'area'

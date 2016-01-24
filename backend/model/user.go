@@ -6,18 +6,18 @@ import (
 )
 
 type UserRow struct {
-	Id bson.ObjectId `bson:"_id,omitempty"`
+	Id        bson.ObjectId `bson:"_id,omitempty"`
 
 	// User login
-	Login string
+	Login     string
 
 	// User token
-	Token string
+	Token     string
 
 	// User avatar
 	AvatarURL string
 
-	Repos []string
+	Packages  []bson.ObjectId
 }
 
 type User struct {
@@ -30,13 +30,15 @@ func NewUser(db *mgo.Database) (*User, error) {
 	return u, nil
 }
 
-func (u *User) CreateUser(ur *UserRow) (*mgo.ChangeInfo, error) {
+
+func (u *User) UpsertUser(ur *UserRow) (*mgo.ChangeInfo, error) {
 	ci, err := u.coll.Upsert(bson.M{"login": ur.Login}, ur)
 	if err != nil {
 		return &mgo.ChangeInfo{}, err
 	}
 	return ci, nil
 }
+
 
 func (u *User) GetByLogin(login string) (*UserRow, error) {
 	ur := new(UserRow)
