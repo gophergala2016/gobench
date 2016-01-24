@@ -32,7 +32,7 @@ type Config struct {
 	HandlerCfg       handler.HandlerConfig `json:"handler"`
 }
 
-//  Frontend provides single point of access to fronend layer
+// Frontend provides single point of access to fronend layer
 type Frontend struct {
 	log    *log.Logger
 	back   *backend.Backend

@@ -37,9 +37,8 @@ func (h *handler) ApiNextTaskHandler(c *echo.Context) error {
 	if err != nil {
 		if err == model.ErrNotFound {
 			return echo.NewHTTPError(http.StatusNoContent)
-		} else {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	task := common.TaskResponse{Id: taskRow.Id.String(), PackageName: taskRow.PackageName, Type: []string{"benchmark"}}
 
@@ -73,9 +72,8 @@ func (h *handler) ApiSubmitTaskResult(c *echo.Context) error {
 	if err != nil {
 		if err == model.ErrNotFound {
 			return echo.NewHTTPError(http.StatusBadRequest, "Wrong Task Id!")
-		} else {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	err = h.back.Model.BenchmarkResult.Add(taskRow.PackageName, tr.Specification, tr.Round)

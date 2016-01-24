@@ -6,6 +6,7 @@ import (
 	"os/exec"
 )
 
+// stores errors
 var (
 	ErrGoPathNotFound = errors.New("Environment variable GOPATH not found")
 )

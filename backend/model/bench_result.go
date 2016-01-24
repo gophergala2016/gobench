@@ -47,7 +47,7 @@ func (br *BenchmarkResult) Add(pkgName, testEnv string, value map[string]parse.S
 
 // Items retrives benchmark results for specific package identified by url
 func (br *BenchmarkResult) Items(pkgName string) ([]BenchmarkResultRow, error) {
-	items := make([]BenchmarkResultRow, 0)
+	var items []BenchmarkResultRow
 	if err := br.coll.Find(bson.M{"packageName": pkgName}).Sort("created").All(&items); err != mgo.ErrNotFound {
 		return nil, err
 	}
