@@ -1,6 +1,6 @@
 # goben.ch
-The Golang community's repositories benchmarking
 ====
+The Golang community's repositories benchmarking
 
 
 ## Purpose
