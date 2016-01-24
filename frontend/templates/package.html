@@ -5,11 +5,13 @@
         <div class="col-xs-8">
             <div class="box box-solid">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Progress Bars Different Sizes</h3>
+                    <h1 class="box-title">{{ .Package.Url }}</h1>
+                    <span><i class="fa fa-download"></i>&nbsp;go get {{ .Package.Url }}</span>
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
-                    asdfsad
+
+                    <p>asdfsad</p>
                 </div>
                 <!-- /.box-body -->
             </div>
@@ -17,7 +19,7 @@
         <div class="col-xs-4">
             <div class="box box-solid">
                 <div class="box-body">
-                    asdfsad
+                    <a href="{{ .Package.Url }}">{{ .Package.Url }}</a>
                 </div>
                 <!-- /.box-body -->
             </div>

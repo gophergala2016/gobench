@@ -19,6 +19,7 @@ import (
 	"path"
 	"sync"
 	"syscall"
+	"strings"
 )
 
 // Config holds frontend configuration params
@@ -70,6 +71,9 @@ func New(cfg *Config, l *log.Logger, b *backend.Backend) (*Frontend, error) {
 	f.router.Post("/api/task/next", h.ApiNextTaskHandler)
 	f.router.Post("/api/task/submit", h.ApiSubmitTaskResult)
 	f.router.Get("/dashboard", h.DashboardGetHandler)
+	f.router.Post("/fav/add", h.AddToFavPostHandler)
+	f.router.Post("/fav/remove", h.RemoveFromFavPostHandler)
+	f.router.Get("/:package", h.PackageGetHandler)
 
 	return f, nil
 }
@@ -114,9 +118,12 @@ func (f *Frontend) Start() error {
 
 // Render implements Echo's Renderer interface
 func (f *Frontend) Render(w io.Writer, name string, data interface{}) error {
+	funcMap := template.FuncMap{
+        "packageUrl": func(s string) string {return strings.Replace(s, "/", "_", -1)},
+    }
 
 	// TODO: implement templates caching
-	tmpl, err := template.ParseFiles(path.Join(f.cfg.TemplateFolder, "layout.html"), path.Join(f.cfg.TemplateFolder, name))
+	tmpl, err := template.New(name).Funcs(funcMap).ParseFiles(path.Join(f.cfg.TemplateFolder, "layout.html"), path.Join(f.cfg.TemplateFolder, name))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("Template reading error. Details: %s", name, err.Error()))
 	}

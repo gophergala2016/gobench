@@ -78,7 +78,15 @@ func (p *Package) Add(pr *PackageRow) error {
 	return nil
 }
 
-func (p *Package) GetItem(name string) ([]PackageRow, error) {
+func (p *Package) GetItem(name string) (PackageRow, error) {
+	var item PackageRow
+	if err := p.coll.Find(bson.M{"url": name}).One(&item); err != nil {
+		return PackageRow{}, err
+	}
+	return item, nil
+}
+
+func (p *Package) GetItems(name string) ([]PackageRow, error) {
 	item := make([]PackageRow, 0)
 	if err := p.coll.Find(bson.M{"url": bson.RegEx{name, ""}}).All(&item); err != nil {
 		return nil, err
@@ -106,11 +114,7 @@ func (p *Package) Favorites(userName string) ([]PackageRow, error) {
 }
 
 // Items returns all repositories
-func (p *Package) GetItemsByIdSlice(ids []string) ([]PackageRow, error) {
-	oids := make([]bson.ObjectId, len(ids))
-	for i := range ids {
-		oids[i] = bson.ObjectIdHex(ids[i])
-	}
+func (p *Package) GetItemsByIdSlice(oids []bson.ObjectId) ([]PackageRow, error) {
 	items := make([]PackageRow, 0)
 	if err := p.coll.Find(bson.M{"_id": bson.M{"$in": oids}}).All(&items); err != nil {
 		return nil, err
@@ -118,6 +122,6 @@ func (p *Package) GetItemsByIdSlice(ids []string) ([]PackageRow, error) {
 	return items, nil
 }
 
-func (p *Package) Items(ids []string) ([]PackageRow, error) {
-	return p.GetItemsByIdSlice(ids)
+func (p *Package) Items(oids []bson.ObjectId) ([]PackageRow, error) {
+	return p.GetItemsByIdSlice(oids)
 }
