@@ -3,8 +3,8 @@ package handler
 import (
 	"github.com/google/go-github/github"
 	"github.com/gophergala2016/gobench/backend/model"
-	"github.com/syntaqx/echo-middleware/session"
 	"github.com/labstack/echo"
+	"github.com/syntaqx/echo-middleware/session"
 	"golang.org/x/oauth2"
 	"log"
 	"net/http"
@@ -54,7 +54,6 @@ func (h *handler) DashboardGetHandler(c *echo.Context) error {
 
 }
 
-
 func addUserRepos(h *handler, u *model.UserRow) error {
 
 	tokenSource := &TokenSource{
@@ -74,14 +73,15 @@ func addUserRepos(h *handler, u *model.UserRow) error {
 
 	for _, repo := range repoList {
 		if repo.Language != nil && *repo.Language == "Go" {
-			r := model.RepositoryRow{
-				Name:   *repo.Name,
-				Url:    strings.Replace(*repo.HTMLURL, "https://", "", -1),
-				Engine: model.Git,
+			pr := &model.PackageRow{
+				//Name:   *repo.Name,
+				Name:          strings.Replace(*repo.HTMLURL, "https://github.com/", "", -1),
+				Url:           *repo.HTMLURL,
+				RepositoryUrl: "https://github.com",
+				Engine:        model.Git,
 			}
-			err = h.back.Model.Repository.Add(r)
+			err = h.back.Model.Package.Add(pr)
 			if err != nil {
-				log.Println(err)
 				return err
 			}
 		}

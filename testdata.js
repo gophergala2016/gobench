@@ -1,5 +1,6 @@
 db.TestEnv.remove({});
-db.TestEnv.insert({"AuthKey": "test-ubuntu-server-14.4x64"});
+db.TestEnv.insert({"authKey": "bare-metal-intel-i5"});
+db.TestEnv.insert({"authKey": "digital-ocean-10$"});
 db.Task.remove({});
-db.Task.insert({"AuthKey": "test-ubuntu-server-14.4x64", "PackageUrl": "github.com/regorov/logwriter"});
-
+db.Task.insert({"authKey": "bare-metal-intel-i5", "packageUrl": "github.com/regorov/logwriter"});
+db.Task.insert({"authKey": "digital-ocean-10$",   "packageUrl": "github.com/regorov/logwriter"});

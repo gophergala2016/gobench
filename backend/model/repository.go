@@ -6,16 +6,6 @@ import (
 	"labix.org/v2/mgo/bson"
 )
 
-type RepositoryEngine string
-
-const (
-	Git RepositoryEngine = "git"
-
-	// TODO: Implement support after GopherGala
-	Bazaar    RepositoryEngine = "bazaar"
-	Mercurial RepositoryEngine = "mercurial"
-)
-
 // Repository holds repository attributes
 type RepositoryRow struct {
 	Id bson.ObjectId
@@ -45,13 +35,13 @@ func NewRepository(db *mgo.Database) (*Repository, error) {
 	return r, nil
 }
 
-func (r *Repository) Add(repo RepositoryRow) error {
+/*func (r *Repository) Add(repo RepositoryRow) error {
 	_, err := r.coll.Upsert(bson.M{"url": repo.Url}, r)
 	if err != nil {
 		return err
 	}
 	return nil
-}
+}*/
 
 // Items returns all repositories
 func (r *Repository) Items(ids []string) ([]RepositoryRow, error) {

@@ -49,18 +49,17 @@ func (h *handler) ApiNextTaskHandler(c *echo.Context) error {
 
 func (h *handler) ApiSubmitTaskResult(c *echo.Context) error {
 
-	enc := json.NewDecoder(c.Request().Body)
+	var tr common.TaskResult
 
-	var taskReq common.TaskRequest
-	if err := enc.Decode(&taskReq); err != nil {
-		c.Request().Body.Close()
-		return echo.NewHTTPError(http.StatusBadRequest, "Wrong JSON. Expected gobench.common.TaskRequst")
+	enc := json.NewDecoder(c.Request().Body)
+	err := enc.Decode(&tr)
+	c.Request().Body.Close()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Wrong JSON. Expected gobench.common.TaskResult")
 	}
 
-	c.Request().Body.Close()
-
 	// checks existing test environment by authKey received by client
-	ok, err := h.back.Model.TestEnvironment.Exist(taskReq.AuthKey)
+	ok, err := h.back.Model.TestEnvironment.Exist(tr.AuthKey)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
@@ -69,8 +68,8 @@ func (h *handler) ApiSubmitTaskResult(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Wrong authKey!")
 	}
 
-	// retrives single task to do
-	taskRow, err := h.back.Model.Task.Next(taskReq.AuthKey)
+	// retrives single task to update
+	taskRow, err := h.back.Model.Task.Next(tr.AuthKey)
 	if err != nil {
 		if err == model.ErrNotFound {
 			return echo.NewHTTPError(http.StatusNoContent)
