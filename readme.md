@@ -1,6 +1,5 @@
 # goben.ch
-The Golang community's repositories benchmarking
-====
+The Golang community's repositories benchmarking and tracking service
 
 
 ## Purpose
@@ -66,7 +65,9 @@ The Golang community's repositories benchmarking
 	- [ ] Slack
 	- [ ] others
 - Badge generator
-	- [ ] gif
+	- [ ] design selector and generator
+
+
 
 
 ## License
