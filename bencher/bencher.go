@@ -16,6 +16,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+	"strconv"
+//	"fmt"
 )
 
 const (
@@ -116,6 +118,7 @@ func (br *BenchClient) run() {
 func (br *BenchClient) execTask() {
 
 	task, ok, err := br.getNextTask()
+
 	if err != nil {
 		br.log.Println("Task request failed. Details: ", err, ". Sleep 5s")
 		time.Sleep(5 * time.Second)
@@ -151,8 +154,16 @@ func (br *BenchClient) execTask() {
 
 	// 2. прогоняем go test bench для разного количества GOMAXPROCSs
 	for i := 0; i < runtime.NumCPU(); i++ {
-		// 3. парсим ответ
+	    idx := "cpu" + strconv.Itoa(i)
 
+	    // 3. Вызываем тест и парсим ответ
+	    result.Round[idx], err = runTest( task.PackageUrl, i )
+	    
+	    if err != nil {
+		log.Printf ("Failed to run test for ", task.PackageUrl, " on " , i , " CPU(s): ", err )
+		continue
+	    }
+	    
 	}
 
 	// several attepmts to submit task execution results
