@@ -36,7 +36,7 @@ type Task struct {
 func NewTask(db *mgo.Database) (*Task, error) {
 	t := &Task{db: db, coll: db.C("task")}
 
-	go func() {
+	/*go func() {
 		var tr TaskRow
 		for {
 			time.Sleep(3 * time.Minute)
@@ -49,7 +49,7 @@ func NewTask(db *mgo.Database) (*Task, error) {
 
 		}
 
-	}()
+	}()*/
 	return t, nil
 }
 
@@ -62,8 +62,9 @@ func (t *Task) Next(authKey string) (*TaskRow, error) {
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, ErrNotFound
+		} else {
+			return nil, err
 		}
-		return nil, err
 	}
 
 	// TODO: medium priority, mark the task as taken and release in N minutes
@@ -87,13 +88,13 @@ func (t *Task) Get(id string) (*TaskRow, error) {
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, ErrNotFound
-		}
+		} else {
 			return nil, err
+		}
 	}
 	return &tr, nil
 }
 
-// Exist status of existing Task
 func (t *Task) Exist(id string) (bool, error) {
 	_, err := t.Get(id)
 	return err == nil, err
@@ -107,8 +108,9 @@ func (t *Task) GetAndDelete(id string) (*TaskRow, error) {
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, ErrNotFound
-		}
+		} else {
 			return nil, err
+		}
 	}
 
 	return &tr, nil

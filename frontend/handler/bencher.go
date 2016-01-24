@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gophergala2016/gobench/backend/model"
 	"github.com/gophergala2016/gobench/common"
 	"github.com/labstack/echo"
@@ -37,8 +38,9 @@ func (h *handler) ApiNextTaskHandler(c *echo.Context) error {
 	if err != nil {
 		if err == model.ErrNotFound {
 			return echo.NewHTTPError(http.StatusNoContent)
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	task := common.TaskResponse{Id: taskRow.Id.String(), PackageName: taskRow.PackageName, Type: []string{"benchmark"}}
 
@@ -57,6 +59,7 @@ func (h *handler) ApiSubmitTaskResult(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Wrong JSON. Expected gobench.common.TaskResult")
 	}
 
+	fmt.Printf("Unmurshal ok: %#v\n", tr)
 	// checks existing test environment by authKey received by client
 	ok, err := h.back.Model.TestEnvironment.Exist(tr.AuthKey)
 	if err != nil {
@@ -67,17 +70,24 @@ func (h *handler) ApiSubmitTaskResult(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Wrong authKey!")
 	}
 
+	fmt.Println("Auth key ok")
+
 	// if rows exist return row + delete
 	taskRow, err := h.back.Model.Task.GetAndDelete(tr.Id)
 	if err != nil {
 		if err == model.ErrNotFound {
 			return echo.NewHTTPError(http.StatusBadRequest, "Wrong Task Id!")
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+
+	fmt.Printf("task get and deleted: %#v\n", taskRow)
 
 	err = h.back.Model.BenchmarkResult.Add(taskRow.PackageName, tr.Specification, tr.Round)
 	if err != nil {
+		fmt.Println("Add benchmark error. Details: ", err)
+
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
