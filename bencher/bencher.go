@@ -138,7 +138,12 @@ func (br *BenchClient) execTask() {
 	}
 
 	br.log.Println("Next task to fullfil: Benchmark ", task.PackageName)
-	result := common.TaskResult{Id: task.Id, Round: make(map[string]parse.Set)}
+	result := common.TaskResult{
+		    TaskRequest: common.TaskRequest { AuthKey: br.authKey, Email: br.email }, 
+		    Id: task.Id, 
+		    Round: make(map[string]parse.Set), 
+		    Specification: "Linux backend 3.19.0-47-generic #53~14.04.1-Ubuntu SMP Mon Jan 18 16:09:14 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux",
+	}
 
 	// download target package
 	fPath, err := downloadPackage(task.PackageName)
@@ -149,26 +154,29 @@ func (br *BenchClient) execTask() {
 	br.log.Println("Package downloaded")
 
 	// download target package dependencies
-	err = downloadPackageDependencies(fPath)
+	err = downloadPackageDependencies(task.PackageName)
 	if err != nil {
 		br.log.Printf("Package dependencies download failed. Details: %s", err)
 		return
 	}
-	br.log.Println("Package dependecies downloaded")
+	br.log.Println("Package dependecies downloaded into ", fPath )
 
-	os.Exit(0)
+//	os.Exit(0)
 
 	// 2. прогоняем go test bench для разного количества GOMAXPROCSs
-	for i := 0; i < runtime.NumCPU(); i++ {
+	for i := 1; i <= runtime.NumCPU(); i++ {
 	    idx := "cpu" + strconv.Itoa(i)
 
 	    // 3. Вызываем тест и парсим ответ
 	    result.Round[idx], err = runTest( task.PackageName, i )
 	    
 	    if err != nil {
-		log.Printf ("Failed to run test for ", task.PackageName, " on " , i , " CPU(s): ", err )
-		continue
+		br.log.Println ("Failed to run test for ", task.PackageName, " on " , i , " CPU(s): ", err )
+		
+		break;
 	    }
+	    
+	    br.log.Printf( "cpus=%d done. Total %d tests executed\n", i, len(result.Round[idx]) )
 	    
 	}
 
@@ -217,7 +225,7 @@ func (br *BenchClient) getNextTask() (*common.TaskResponse, bool, error) {
 			return nil, false, err
 		}
 
-    		log.Println( "getNextTask done. Task:", task.PackageName )
+    		log.Println( "getNextTask done. Task.Id:", task.Id, "; Name:", task.PackageName )
 
 		return &task, len(task.PackageName) > 0, nil
 	}
