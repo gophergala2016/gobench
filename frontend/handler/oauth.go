@@ -34,7 +34,7 @@ func (h *handler) OauthCallbackHandler(c *echo.Context) error {
 	code := c.Query("code")
 	token, err := oauthConf.Exchange(oauth2.NoContext, code)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err.Error(), "Can't exchange token")
 		return c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 
@@ -42,7 +42,7 @@ func (h *handler) OauthCallbackHandler(c *echo.Context) error {
 	client := github.NewClient(oauthClient)
 	user, _, err := client.Users.Get("")
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err.Error(), "Can't get user")
 		return c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 
@@ -56,7 +56,7 @@ func (h *handler) OauthCallbackHandler(c *echo.Context) error {
 	}
 	ci, err := h.back.Model.User.CreateOrUpdateUser(&u)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err.Error(), "Can't create user")
 		return c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 

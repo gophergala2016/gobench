@@ -33,7 +33,17 @@ func (h *handler) DashboardGetHandler(c *echo.Context) error {
 		return c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 	if s.Get("just_signup") != nil {
-		err = addUserRepos(h, user)
+		packages, err := addUserRepos(h, user)
+		if err != nil {
+			log.Println(err)
+			return c.Redirect(http.StatusTemporaryRedirect, "/")
+		}
+		var up []bson.ObjectId
+		for _, p := range packages {
+			up = append(up, p.Id)
+		}
+		user.Packages = up
+		_, err = h.back.Model.User.UpsertUser(user)
 		if err != nil {
 			log.Println(err)
 			return c.Redirect(http.StatusTemporaryRedirect, "/")
@@ -116,7 +126,7 @@ func (h *handler) AddToFavPostHandler(c *echo.Context) error {
 }
 
 
-func addUserRepos(h *handler, u *model.UserRow) error {
+func addUserRepos(h *handler, u *model.UserRow) ([]*model.PackageRow, error) {
 
 	tokenSource := &TokenSource{
 		AccessToken: u.Token,
@@ -125,14 +135,15 @@ func addUserRepos(h *handler, u *model.UserRow) error {
 	client := github.NewClient(oauthClient)
 	user, _, err := client.Users.Get("")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	repoList, _, err := client.Repositories.List(*user.Login, &github.RepositoryListOptions{Type: "owner"})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	packages := make([]*model.PackageRow, 0)
 	for _, repo := range repoList {
 		if repo.Language != nil && *repo.Language == "Go" {
 			pr := &model.PackageRow{
@@ -144,14 +155,15 @@ func addUserRepos(h *handler, u *model.UserRow) error {
 				Engine:        model.Git,
 				Tags:          getRepoTags(*user.Login, *repo.Name, client),
 			}
-			err = h.back.Model.Package.Add(pr)
+			newPr, err := h.back.Model.Package.Add(pr)
 			if err != nil {
-				return err
+				return nil, err
 			}
+			packages = append(packages, newPr)
 		}
 	}
 
-	return nil
+	return packages, nil
 }
 
 func getRepoTags(user string, repoName string, client *github.Client) []model.RepositoryTag {

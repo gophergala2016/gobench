@@ -79,14 +79,14 @@ func NewPackage(db *mgo.Database) (*Package, error) {
 }
 
 // Add inserts new package and ignores if package exist already
-func (p *Package) Add(pr *PackageRow) error {
+func (p *Package) Add(pr *PackageRow) (*PackageRow, error) {
 	pr.Created = time.Now()
-
+	pr.Id = bson.NewObjectId()
 	err := p.coll.Insert(pr)
 	if err != nil && !mgo.IsDup(err) {
-		return err
+		return nil, err
 	}
-	return nil
+	return pr, nil
 }
 
 func (p *Package) GetItem(name string) (PackageRow, error) {

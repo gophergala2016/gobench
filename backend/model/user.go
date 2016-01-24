@@ -33,10 +33,10 @@ func NewUser(db *mgo.Database) (*User, error) {
 
 func (u *User) CreateOrUpdateUser(ur *UserRow) (*mgo.ChangeInfo, error) {
 	mu, err := u.GetByLogin(ur.Login)
-	if err != nil {
+	if err != nil && err != mgo.ErrNotFound {
 		return nil, err
 	}
-	if (mu != &UserRow{}) {
+	if (err != mgo.ErrNotFound) {
 		mu.Token = ur.Token
 		mu.AvatarURL = ur.AvatarURL
 	} else {

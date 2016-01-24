@@ -139,15 +139,3 @@ func (f *Frontend) Render(w io.Writer, name string, data interface{}) error {
 
 	return nil
 }
-
-//func frontendMiddleware() echo.MiddlewareFunc {
-//	return func(h echo.HandlerFunc) echo.HandlerFunc {
-//		return func(c *echo.Context) error {
-//			s := session.Default(c)
-//			user := s.Get("user")
-//			c.Set("user", user)
-//
-//			return nil
-//		}
-//	}
-//}
