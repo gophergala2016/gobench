@@ -30,6 +30,9 @@ type PackageRow struct {
 	// Description of the package
 	Description   string `bson:"description"`
 
+	// All tags of This repository
+	Tags []RepositoryTag `bson:"tags"`
+
 	// Repository holds repository url (https://github.com or https://labix.org, etc)
 	RepositoryUrl string `bson:"repositoryUrl"`
 
@@ -44,6 +47,13 @@ type PackageRow struct {
 
 	// LastCommitUid holds hash of the the last commit
 	LastCommitId  string
+}
+
+type RepositoryTag struct {
+	Name string `bson: "name"`
+	Zip string `bson: "zip"`
+	Tar string `bson: "tar"`
+	Commit string `bson: "commit"`
 }
 
 // Package provides single point of access to all packages
@@ -68,7 +78,7 @@ func NewPackage(db *mgo.Database) (*Package, error) {
 	return p, p.coll.EnsureIndex(mgo.Index{Key: []string{"url"}, Unique: true, DropDups: true})
 }
 
-// Add inserts new package and ignores if package exist aready
+// Add inserts new package and ignores if package exist already
 func (p *Package) Add(pr *PackageRow) error {
 	pr.Created = time.Now()
 
@@ -80,9 +90,9 @@ func (p *Package) Add(pr *PackageRow) error {
 }
 
 func (p *Package) GetItem(name string) (PackageRow, error) {
-	var item PackageRow
-	if err := p.coll.Find(bson.M{"url": name}).One(&item); err != nil {
-		return PackageRow{}, err
+	item := PackageRow{}
+	if err := p.coll.Find(bson.M{"url": bson.RegEx{name, ""}}).One(&item); err != nil {
+		return item, err
 	}
 	return item, nil
 }

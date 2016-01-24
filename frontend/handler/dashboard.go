@@ -139,8 +139,10 @@ func addUserRepos(h *handler, u *model.UserRow) error {
 				//Name:   *repo.Name,
 				Name:          strings.Replace(*repo.HTMLURL, "https://github.com/", "", -1),
 				Url:           *repo.HTMLURL,
+				Description:   *repo.Description,
 				RepositoryUrl: "https://github.com",
 				Engine:        model.Git,
+				Tags:          getRepoTags(*user.Login, *repo.Name, client),
 			}
 			err = h.back.Model.Package.Add(pr)
 			if err != nil {
@@ -150,4 +152,13 @@ func addUserRepos(h *handler, u *model.UserRow) error {
 	}
 
 	return nil
+}
+
+func getRepoTags(user string, repoName string, client *github.Client) []model.RepositoryTag {
+	tags := make([]model.RepositoryTag,0,1)
+	githubTags,_,_ := client.Repositories.ListTags(user,repoName,nil)
+	for _,v := range githubTags {
+		tags = append(tags, model.RepositoryTag{Name: *v.Name, Zip: *v.ZipballURL, Tar: *v.TarballURL, Commit: *v.Commit.URL})
+	}
+	return tags
 }
