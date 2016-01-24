@@ -5,17 +5,11 @@
         <div class="col-xs-8">
             <div class="box box-solid">
                 <div class="box-header with-border">
-                    <h1 class="box-title">{{ .Package.Url }}</h1>
+                    <h1 class="box-title">{{ .Package.Name }}</h1>
                     <span><i class="fa fa-download"></i>&nbsp;go get {{ .Package.Url }}</span>
                 </div>
-                <h2> {{ .Package.Description }} </h2>
-                <div class="box-body">
-                    {{range .Package.Tags }}
-                    <h4>{{ .Name }}</h4>
-                    <a href=".tar"> {{ .Tar}}</a>
-                    <a href=".zip"> {{ .Zip}}</a>
-                    {{end}}
-                </div>
+                <h2 class="box-header"> {{ .Package.Description }} </h2>
+
                 <!-- /.box-body -->
             </div>
         </div>
@@ -24,10 +18,23 @@
                 <div class="box-body">
                     <a href="{{ .Package.Url }}">{{ .Package.Url }}</a>
                 </div>
+                <div class="box box-solid">
+                    <ul>
+                        {{range .Package.Tags }}
+                    <li>
+                    <div class="box-body">
+                    <b>{{ .Name }}</b>
+                    <a href="{{.Tar}}" inline> .Tar</a>
+                    <a href="{{.Zip}}"> .Zip</a>
+                    </div>
+                    </li>
+                    {{end}}
+                    </ul>
+                    </div>
+                </div>
                 <!-- /.box-body -->
             </div>
         </div>
     </div>
 </section>
-
 {{end}}
