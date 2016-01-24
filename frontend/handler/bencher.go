@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gophergala2016/gobench/backend/model"
 	"github.com/gophergala2016/gobench/common"
 	"github.com/labstack/echo"
