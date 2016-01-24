@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	
 )
 
 // stores errors
@@ -31,6 +32,15 @@ func downloadPackage(name string) (string, error) {
 }
 
 func downloadPackageDependencies(name string) error {
+
+	cmd := exec.Command("go", "test", "-i", name )
+	err := cmd.Start()
+	if err != nil {
+	    return err
+	}
+	if err = cmd.Wait(); err != nil {
+	    return err
+	}
 
 	return nil
 }

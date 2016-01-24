@@ -13,37 +13,45 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"strconv"
 	"sync"
 	"syscall"
 	"time"
+	//	"fmt"
 )
 
 const (
-	baseUrl           = "http://127.0.0.1:8080"
-	debug             = true
-	nextTaskUrl       = baseUrl + "/api/task/next"
-	submitResultUrl   = baseUrl + "/api/task/submit"
-	maxSubmitAttepmts = 5
+	//	baseUrl           = "http://127.0.0.1:8080"
+	debug                = true
+	nextTaskLocation     = "/api/task/next"
+	submitResultLocation = "/api/task/submit"
+	maxSubmitAttepmts    = 5
 )
 
 // BenchClient implements client interface to goben.ch server
 type BenchClient struct {
-	client        *http.Client
-	log           *log.Logger
-	authKey       string
-	email         string
-	stopCh        chan os.Signal
-	specification string
+	client          *http.Client
+	log             *log.Logger
+	authKey         string
+	email           string
+	baseUrl         string
+	nextTaskUrl     string
+	submitResultUrl string
+	stopCh          chan os.Signal
+	specification   string
 }
 
 // NewBenchClient creates BenchClient instance
-func NewBenchClient(authKey, email string, l *log.Logger) (*BenchClient, error) {
+func NewBenchClient(authKey, email, baseurl string, l *log.Logger) (*BenchClient, error) {
 
 	br := &BenchClient{
-		authKey: authKey,
-		email:   email,
-		client:  &http.Client{Timeout: 2 * time.Second},
-		log:     l,
+		authKey:         authKey,
+		email:           email,
+		baseUrl:         baseurl,
+		nextTaskUrl:     baseurl + nextTaskLocation,
+		submitResultUrl: baseurl + submitResultLocation,
+		client:          &http.Client{Timeout: 2 * time.Second},
+		log:             l,
 	}
 
 	// TODO: identify current machine specification: RAM, CPU, OS, etc.
@@ -66,7 +74,7 @@ func (br *BenchClient) Ping() error {
 func (br *BenchClient) ping() error {
 
 	// TODO: process HTTP 301
-	resp, err := br.client.Head(baseUrl)
+	resp, err := br.client.Head(br.baseUrl)
 	if err != nil {
 		return err
 	}
@@ -115,6 +123,7 @@ func (br *BenchClient) run() {
 func (br *BenchClient) execTask() {
 
 	task, ok, err := br.getNextTask()
+
 	if err != nil {
 		br.log.Println("Task request failed. Details: ", err, ". Sleep 5s")
 		time.Sleep(5 * time.Second)
@@ -128,7 +137,13 @@ func (br *BenchClient) execTask() {
 	}
 
 	br.log.Println("Next task to fullfil: Benchmark ", task.PackageName)
-	result := common.TaskResult{TaskRequest: common.TaskRequest{AuthKey: "", Email: ""}, Id: task.Id, Round: make(map[string]parse.Set)}
+
+	result := common.TaskResult{
+		TaskRequest:   common.TaskRequest{AuthKey: br.authKey, Email: br.email},
+		Id:            task.Id,
+		Round:         make(map[string]parse.Set),
+		Specification: "Linux backend 3.19.0-47-generic #53~14.04.1-Ubuntu SMP Mon Jan 18 16:09:14 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux",
+	}
 
 	// download target package
 	fPath, err := downloadPackage(task.PackageName)
@@ -139,18 +154,29 @@ func (br *BenchClient) execTask() {
 	br.log.Println("Package downloaded")
 
 	// download target package dependencies
-	err = downloadPackageDependencies(fPath)
+	err = downloadPackageDependencies(task.PackageName)
 	if err != nil {
 		br.log.Printf("Package dependencies download failed. Details: %s", err)
 		return
 	}
-	br.log.Println("Package dependecies downloaded")
+	br.log.Println("Package dependecies downloaded into ", fPath)
 
-	os.Exit(0)
+	//	os.Exit(0)
 
 	// 2. прогоняем go test bench для разного количества GOMAXPROCSs
-	for i := 0; i < runtime.NumCPU(); i++ {
-		// 3. парсим ответ
+	for i := 1; i <= runtime.NumCPU(); i++ {
+		idx := "cpu" + strconv.Itoa(i)
+
+		// 3. Вызываем тест и парсим ответ
+		result.Round[idx], err = runTest(task.PackageName, i)
+
+		if err != nil {
+			br.log.Println("Failed to run test for ", task.PackageName, " on ", i, " CPU(s): ", err)
+
+			break
+		}
+
+		br.log.Printf("cpus=%d done. Total %d tests executed\n", i, len(result.Round[idx]))
 
 	}
 
@@ -176,12 +202,14 @@ func (br *BenchClient) execTask() {
 // getNextTask retrives next benchmarking task from goben.ch server
 func (br *BenchClient) getNextTask() (*common.TaskResponse, bool, error) {
 
+	log.Println("getNextTask started")
+
 	buf, err := json.Marshal(common.TaskRequest{AuthKey: br.authKey, Email: br.email})
 	if err != nil {
 		return nil, false, err
 	}
 
-	resp, err := br.client.Post(nextTaskUrl, "application/json; charset=UTF-8", bytes.NewReader(buf))
+	resp, err := br.client.Post(br.nextTaskUrl, "application/json; charset=UTF-8", bytes.NewReader(buf))
 	if err != nil {
 		return nil, false, err
 	}
@@ -197,6 +225,8 @@ func (br *BenchClient) getNextTask() (*common.TaskResponse, bool, error) {
 			return nil, false, err
 		}
 
+		log.Println("getNextTask done. Task.Id:", task.Id, "; Name:", task.PackageName)
+
 		return &task, len(task.PackageName) > 0, nil
 	}
 
@@ -208,6 +238,7 @@ func (br *BenchClient) getNextTask() (*common.TaskResponse, bool, error) {
 
 	// other server responses
 	buf, _ = ioutil.ReadAll(resp.Body)
+	log.Println("getNextTask done. No task received")
 	return nil, false, errors.New(string(buf))
 }
 
@@ -219,7 +250,7 @@ func (br *BenchClient) submitResult(result *common.TaskResult) (bool, error) {
 		return true, err
 	}
 
-	resp, err := br.client.Post(submitResultUrl, "application/json; charset=UTF-8", bytes.NewReader(buf))
+	resp, err := br.client.Post(br.submitResultUrl, "application/json; charset=UTF-8", bytes.NewReader(buf))
 	if err != nil {
 		return true, err
 	}
