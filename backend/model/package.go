@@ -78,7 +78,15 @@ func (p *Package) Add(pr *PackageRow) error {
 	return nil
 }
 
-func (p *Package) GetItem(name string) ([]PackageRow, error) {
+func (p *Package) GetItem(name string) (PackageRow, error) {
+	var item PackageRow
+	if err := p.coll.Find(bson.M{"url": name}).One(&item); err != nil {
+		return PackageRow{}, err
+	}
+	return item, nil
+}
+
+func (p *Package) GetItems(name string) ([]PackageRow, error) {
 	item := make([]PackageRow, 0)
 	if err := p.coll.Find(bson.M{"url": bson.RegEx{name, ""}}).All(&item); err != nil {
 		return nil, err
